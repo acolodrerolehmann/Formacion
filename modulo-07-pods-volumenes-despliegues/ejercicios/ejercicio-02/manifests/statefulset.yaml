@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: inventario-db
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: inventario-db
+  serviceName: "" # FIX: apuntar al headless Service db-headless
+  template:
+    metadata:
+      labels:
+        app: inventario-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          env:
+            - name: POSTGRES_DB
+              value: inventario
+            - name: POSTGRES_USER
+              value: admin
+            - name: POSTGRES_PASSWORD
+              value: training123
+          ports:
+            - name: postgres
+              containerPort: 5432
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata # FIX: debe coincidir con volumeMounts[].name
+      spec:
+        accessModes:
+          - ReadOnlyMany # FIX: PostgreSQL necesita escritura
+        resources:
+          requests:
+            storage: 100Mi # FIX: pedir una capacidad razonable

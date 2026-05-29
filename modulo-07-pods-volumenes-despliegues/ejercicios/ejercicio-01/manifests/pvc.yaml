@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: uploads-pvc
+spec:
+  accessModes:
+    # TODO: usar el mismo modo de acceso que el PV
+  resources:
+    requests:
+      storage: # TODO: pedir la capacidad adecuada
+  storageClassName: # TODO: usar la clase manual
+  volumeName: # TODO: enlazar con uploads-pv

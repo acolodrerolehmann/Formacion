@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+        - name: database
+          image: postgres:latest # TODO: usar la misma versión que en el compose
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: cambiarme # TODO: copiar el valor correcto
+            - name: POSTGRES_USER
+              value: cambiarme # TODO: copiar el valor correcto
+            - name: POSTGRES_PASSWORD
+              value: cambiarme # TODO: copiar el valor correcto
+          volumeMounts:
+            - name: db-data
+              mountPath: /data # TODO: usar el path correcto de PostgreSQL
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: pendiente # TODO: referenciar el PVC correcto
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database
+spec:
+  selector:
+    app: database
+  ports:
+    - port: 5432
+      targetPort: 5432
+  type: LoadBalancer # TODO: este servicio debe ser interno
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-data
+spec:
+  accessModes:
+    - ReadOnlyMany # TODO: usar un modo de acceso adecuado
+  resources:
+    requests:
+      storage: 100Mi # TODO: ajustar un tamaño razonable

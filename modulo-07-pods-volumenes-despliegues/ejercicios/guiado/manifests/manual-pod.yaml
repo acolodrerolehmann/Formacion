@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-manual
+  namespace: modulo-07-guiado
+  labels:
+    app: web-manual
+    module: modulo-07
+    exercise: guiado
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.25-alpine
+      ports:
+        - containerPort: 80

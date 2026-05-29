@@ -1,0 +1,14 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: # TODO: definir el nodo de control
+    extraPortMappings:
+      - containerPort: # TODO: puerto interno HTTP
+        hostPort: # TODO: puerto publicado en el host para HTTP
+        protocol: TCP
+      - containerPort: # TODO: puerto interno HTTPS
+        hostPort: # TODO: puerto publicado en el host para HTTPS
+        protocol: TCP
+  - role: # TODO: definir worker 1
+  - role: # TODO: definir worker 2
+  - role: # TODO: definir worker 3

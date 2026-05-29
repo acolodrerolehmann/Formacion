@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: tienda-rs
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tienda-web
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: tienda-web
+        tier: frontend
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tienda-service
+spec:
+  type: ClusterIP
+  selector:
+    app: tienda-ui # FIX: debe coincidir con el label app de los Pods
+    tier: web # FIX: debe coincidir con el label tier de los Pods
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

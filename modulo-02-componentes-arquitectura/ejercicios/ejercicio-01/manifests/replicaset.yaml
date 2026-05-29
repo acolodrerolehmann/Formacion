@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+spec:
+  replicas: # TODO: define 3 réplicas
+  selector:
+    matchLabels:
+      app: # TODO: completa el label del selector
+  template:
+    metadata:
+      labels:
+        app: # TODO: usa el mismo label que en el selector
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.25
+          ports:
+            - containerPort: 80

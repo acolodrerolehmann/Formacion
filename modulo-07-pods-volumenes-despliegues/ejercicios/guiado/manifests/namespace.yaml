@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: modulo-07-guiado
+  labels:
+    module: modulo-07
+    exercise: guiado

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  replicas: 1 # TODO: usar el número correcto de réplicas
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: nginx:latest # TODO: usar la imagen correcta del compose
+          ports:
+            - containerPort: 80
+          env:
+            - name: API_URL
+              value: http://localhost:3000 # TODO: apuntar al Service interno de la API
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  selector:
+    app: web
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP # TODO: exponer web fuera del cluster

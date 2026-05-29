@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+  labels:
+    module: modulo-06
+    exercise: guiado
+    environment: dev
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod
+  labels:
+    module: modulo-06
+    exercise: guiado
+    environment: prod

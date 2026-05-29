@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-app
+  namespace: dev
+  labels:
+    app: demo-app
+    module: modulo-06
+    exercise: guiado
+    environment: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-app
+      environment: dev
+  template:
+    metadata:
+      labels:
+        app: demo-app
+        module: modulo-06
+        exercise: guiado
+        environment: dev
+    spec:
+      containers:
+        - name: http-echo
+          image: hashicorp/http-echo:1.0.0
+          args:
+            - "-text=Hola desde dev"
+            - "-listen=:5678"
+          ports:
+            - containerPort: 5678
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-app
+  namespace: dev
+  labels:
+    app: demo-app
+    module: modulo-06
+    exercise: guiado
+    environment: dev
+spec:
+  selector:
+    app: demo-app
+    environment: dev
+  ports:
+    - port: 5678
+      targetPort: 5678

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: ClusterIP
+  selector:
+    app: # TODO: usa el mismo label que el ReplicaSet
+  ports:
+    - protocol: TCP
+      port: # TODO: expón el puerto 80
+      targetPort: # TODO: envía tráfico al puerto 80 del contenedor

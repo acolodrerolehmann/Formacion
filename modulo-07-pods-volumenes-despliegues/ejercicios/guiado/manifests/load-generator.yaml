@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: load-generator
+  namespace: modulo-07-guiado
+  labels:
+    app: load-generator
+    module: modulo-07
+    exercise: guiado
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - while true; do wget -q -O- http://web-hpa > /dev/null; done

@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: modulo-07-guiado
+  labels:
+    app: mysql
+    module: modulo-07
+    exercise: guiado
+spec:
+  clusterIP: None
+  selector:
+    app: mysql
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: modulo-07-guiado
+  labels:
+    app: mysql
+    module: modulo-07
+    exercise: guiado
+spec:
+  serviceName: mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+        module: modulo-07
+        exercise: guiado
+    spec:
+      initContainers:
+        - name: prepare-volume
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - chown -R 999:999 /var/lib/mysql
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+              name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: formacion123
+            - name: MYSQL_DATABASE
+              value: curso
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc

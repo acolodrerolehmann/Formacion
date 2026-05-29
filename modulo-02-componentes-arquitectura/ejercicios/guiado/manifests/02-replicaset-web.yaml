@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: rs-demo-web
+  labels:
+    app: rs-demo
+    curso: kubernetes
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rs-demo
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: rs-demo
+        tier: frontend
+        curso: kubernetes
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80

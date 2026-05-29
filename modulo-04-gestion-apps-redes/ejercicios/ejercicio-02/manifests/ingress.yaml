@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: apps-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: # TODO: usar Prefix
+            backend:
+              service:
+                name: # TODO: enviar /api al Service del backend
+                port:
+                  number: # TODO: usar el puerto correcto del Service
+          - path: /
+            pathType: # TODO: usar Prefix
+            backend:
+              service:
+                name: # TODO: enviar / al Service del frontend
+                port:
+                  number: # TODO: usar el puerto correcto del Service

@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  web:
+    image: ghcr.io/formacion/web-portal:1.0
+    ports:
+      - "8080:80"
+    environment:
+      API_URL: http://api:3000
+    depends_on:
+      - api
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+
+  api:
+    image: ghcr.io/formacion/orders-api:1.0
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: database
+      DB_PORT: "5432"
+      DB_NAME: appdb
+      DB_USER: appuser
+      DB_PASSWORD: secret123
+    depends_on:
+      - database
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+
+  database:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: secret123
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

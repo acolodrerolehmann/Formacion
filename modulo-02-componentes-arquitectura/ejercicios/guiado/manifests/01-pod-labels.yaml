@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-etiquetas
+  labels:
+    app: pod-demo
+    curso: kubernetes
+    modulo: arquitectura
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.25-alpine
+      ports:
+        - containerPort: 80

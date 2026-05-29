@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-uploads
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp-uploads
+  template:
+    metadata:
+      labels:
+        app: webapp-uploads
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: uploads-storage
+              mountPath: /usr/share/nginx/html/uploads
+      volumes:
+        - name: uploads-storage
+          persistentVolumeClaim:
+            claimName: uploads-pvc

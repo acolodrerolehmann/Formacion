@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-web
+  labels:
+    # TODO: Definir la etiqueta principal de la aplicación
+    app: # <completar>
+    # TODO: Definir la etiqueta de capa
+    tier: # <completar>
+spec:
+  containers:
+    - name: web
+      # TODO: Especificar la imagen del contenedor
+      image: # <completar>
+      ports:
+        - # TODO: Indicar el puerto expuesto por el contenedor
+          containerPort: # <completar>

@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-deny-ingress
+spec:
+  podSelector:
+    matchLabels:
+      # TODO: aplicar esta policy solo a los pods frontend
+  policyTypes:
+    - Ingress
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-allow-frontend
+spec:
+  podSelector:
+    matchLabels:
+      # TODO: aplicar esta policy solo a los pods backend
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              # TODO: permitir solo pods frontend
+      ports:
+        - protocol: TCP
+          port: # TODO: abrir solo el puerto 8080 del backend

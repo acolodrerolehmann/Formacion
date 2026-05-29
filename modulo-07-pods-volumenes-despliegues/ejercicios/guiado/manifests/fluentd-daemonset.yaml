@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: modulo-07-guiado
+  labels:
+    app: fluentd
+    module: modulo-07
+    exercise: guiado
+data:
+  fluent.conf: |
+    <source>
+      @type tail
+      path /var/log/containers/*.log
+      exclude_path ["/var/log/containers/*_modulo-07-guiado_fluentd-*.log"]
+      pos_file /fluentd/log/fluentd-containers.log.pos
+      tag kubernetes.*
+      read_from_head true
+      <parse>
+        @type none
+      </parse>
+    </source>
+
+    <match kubernetes.**>
+      @type stdout
+    </match>
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+  namespace: modulo-07-guiado
+  labels:
+    app: fluentd
+    module: modulo-07
+    exercise: guiado
+spec:
+  selector:
+    matchLabels:
+      app: fluentd
+  template:
+    metadata:
+      labels:
+        app: fluentd
+        module: modulo-07
+        exercise: guiado
+    spec:
+      containers:
+        - name: fluentd
+          image: fluent/fluentd:v1.16-1
+          securityContext:
+            runAsUser: 0
+          env:
+            - name: FLUENTD_CONF
+              value: fluent.conf
+          volumeMounts:
+            - name: config
+              mountPath: /fluentd/etc/fluent.conf
+              subPath: fluent.conf
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true
+            - name: pos
+              mountPath: /fluentd/log
+      volumes:
+        - name: config
+          configMap:
+            name: fluentd-config
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: pos
+          emptyDir: {}

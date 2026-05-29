@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: team-a-quota
+  namespace: # TODO: namespace objetivo
+spec:
+  hard:
+    limits.cpu: # TODO: CPU total máxima
+    limits.memory: # TODO: memoria total máxima
+    pods: # TODO: máximo de pods
