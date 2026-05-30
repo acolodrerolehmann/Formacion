@@ -6,17 +6,97 @@
 
 ---
 
-## 1. Apertura: De Docker a Kubernetes (~10 min)
+## 1. Introducción a Kubernetes (~15 min)
 
-**Mensaje clave:** "Ya sabéis orquestar contenedores con Swarm. Kubernetes resuelve los mismos problemas, pero a mayor escala y con más control."
+### El Problema: ¿Por qué necesitamos esto?
 
-Puntos a tratar:
-- Kubernetes (K8s) = plataforma open-source de orquestación de contenedores
-- Creado por Google (2014), basado en experiencia interna (Borg/Omega)
-- Escrito en Go, gestionado por la CNCF
-- Estándar de facto en la industria
+> Imaginad que tenéis 50 contenedores Docker repartidos en 10 servidores. Es viernes a las 18:00. Uno de los servidores se cae. ¿Quién mueve los contenedores? ¿Quién avisa al load balancer? ¿Quién se queda el viernes?
 
-**Paralelo con Swarm:**
+Con Docker sabéis empaquetar apps. Con Swarm aprendisteis a distribuirlas. Pero en producción real aparecen problemas que Swarm resuelve "a medias":
+
+- 🔥 Un nodo se cae → ¿quién redistribuye la carga *rápido*?
+- 📈 Black Friday → ¿quién escala de 3 a 30 réplicas *automáticamente*?
+- 🔄 Deploy de nueva versión → ¿cómo hacerlo con *cero downtime*?
+- 🔒 Microservicio A no debería hablar con C → ¿quién controla eso?
+- 💾 La base de datos necesita disco que *sobreviva* al contenedor → ¿cómo?
+
+**Kubernetes resuelve todos estos problemas.** Y lo hace de forma declarativa: tú describes el estado deseado, K8s se encarga de mantenerlo.
+
+### Origen: De Google al Mundo
+
+| Año | Evento |
+|-----|--------|
+| **2003-2013** | Google ejecuta *billones* de contenedores/semana con sistemas internos: **Borg** y **Omega** |
+| **2014** | Google libera Kubernetes como open-source (no es Borg, pero hereda sus ideas) |
+| **Jul 2015** | Kubernetes v1.0 — donado a la CNCF (Cloud Native Computing Foundation) |
+| **2017-2018** | AWS, Azure y GCP ofrecen K8s gestionado. Docker Inc. añade soporte nativo |
+| **2020** | Docker Swarm pierde relevancia. K8s es el estándar de facto |
+| **Hoy** | 96% de organizaciones usan o evalúan K8s (CNCF Survey 2023) |
+
+### ¿Qué es Kubernetes en una frase?
+
+> "Kubernetes es una plataforma portable y extensible de código abierto para administrar cargas de trabajo y servicios. Facilita la automatización y la configuración declarativa."
+
+- 📦 **Orientada a contenedores** — todo es un contenedor
+- 🧩 **Microservicios** — diseñada para apps distribuidas
+- ☁️ **Híbrida / Multi-cloud** — funciona igual en cualquier sitio
+- 🛠️ **Escrito en Go** — rápido, compilado, concurrente
+- 🌍 **Comunidad masiva** — +3.500 contributors, mayor proyecto en GitHub después de Linux
+
+### El nombre
+
+**Kubernetes** (κυβερνήτης) = "timonel" en griego. El que dirige el barco. **K8s** = K + 8 letras + s. El logo es un timón con 7 lados (los 7 "pilares" originales del proyecto).
+
+![Kubernetes Overview](assets/kubernetes-overview.png)
+
+---
+
+## 2. Conceptos Fundamentales (~15 min)
+
+### ¿Qué es un Orquestador?
+
+Pensad en una **orquesta sinfónica**:
+
+| Orquesta | Kubernetes |
+|----------|-----------|
+| 🎵 Músicos | Contenedores (tu código) |
+| 🎼 Partitura | Manifiestos YAML (estado deseado) |
+| 🎻 Secciones (cuerdas, viento...) | Servicios, Deployments |
+| 🪑 Sillas/Atriles | Nodos (infraestructura) |
+| 🎩 **Director** | **Kubernetes** (el orquestador) |
+
+El director no toca ningún instrumento. **Coordina**. Si un músico se equivoca, le corrige. Si falta un violín, busca un sustituto. Si la pieza requiere más volumen, añade instrumentos.
+
+> Un orquestador de contenedores hace lo mismo: no ejecuta tu código, pero se asegura de que esté corriendo donde debe, cuando debe, y en la cantidad correcta.
+
+### Las 7 Capacidades de un Orquestador
+
+| # | Capacidad | Ejemplo real | ¿Swarm lo hace? |
+|---|-----------|-------------|-----------------|
+| 1 | **Scheduling** — Decidir dónde ejecutar cada contenedor | "Este pod necesita 2GB RAM → va al nodo que tenga espacio" | ✅ Básico |
+| 2 | **Auto-healing** — Recuperarse de fallos automáticamente | "El pod murió → reiniciar. El nodo cayó → mover pods a otro" | ✅ Básico |
+| 3 | **Auto-scaling** — Escalar según demanda | "CPU al 80% → crear 5 réplicas más. Baja al 20% → reducir a 2" | ❌ Manual |
+| 4 | **Service Discovery** — Encontrar servicios por nombre | `curl http://api-users:8080` → resuelve automáticamente | ✅ DNS |
+| 5 | **Load Balancing** — Distribuir tráfico entre réplicas | "3 pods de nginx → repartir requests round-robin" | ✅ Routing mesh |
+| 6 | **Rolling Updates** — Actualizar sin downtime | "Reemplazar v1.2 → v1.3 un pod a la vez, sin cortar tráfico" | ✅ Básico |
+| 7 | **Declarative Config** — Describes QUÉ, no CÓMO | "Quiero 3 réplicas de nginx:1.25 con 512MB RAM" → K8s lo hace | ⚠️ Parcial |
+
+> **Nota para el instructor:** Preguntar: "¿Cuántas de estas 7 usáis activamente en Swarm?" — la mayoría dirá 3-4. K8s las tiene todas, más potentes, y además añade: Network Policies, RBAC, CRDs, HPA/VPA, Ingress, etc.
+
+### Declarativo vs Imperativo
+
+| Imperativo (Docker/Swarm) | Declarativo (Kubernetes) |
+|---------------------------|--------------------------|
+| "Arranca 3 contenedores de nginx" | "Quiero que siempre haya 3 nginx" |
+| `docker service create --replicas 3 nginx` | `kubectl apply -f deployment.yaml` |
+| Dices **qué hacer** | Dices **cómo debe quedar** |
+| Si uno muere, tú lo reinicias | Si uno muere, K8s lo recrea solo |
+| El estado es "lo que pasó" | El estado es "lo que debería ser" |
+
+> Kubernetes funciona con un **reconciliation loop**: compara constantemente el estado actual con el estado deseado. Si hay diferencia, actúa. Siempre. 24/7. Sin intervención humana.
+
+### Traducción Swarm → K8s
+
 | Docker Swarm | Kubernetes |
 |-------------|-----------|
 | `docker service create` | `kubectl apply -f deployment.yaml` |
@@ -24,26 +104,7 @@ Puntos a tratar:
 | Swarm manager | Control Plane (API Server) |
 | Swarm worker | Worker Node |
 | Overlay network | CNI plugins (Calico, Flannel, Cilium) |
-| Simple, integrado en Docker | Más complejo, más potente |
-
----
-
-## 2. Conceptos Fundamentales (~15 min)
-
-![Kubernetes Overview](assets/kubernetes-overview.png)
-
-**Qué es un orquestador:**
-- Coordina contenedores en múltiples máquinas
-- Configuración declarativa (describes QUÉ quieres, no CÓMO)
-- Auto-healing, auto-scaling, rolling updates
-
-**Capacidades principales:**
-- Flujos de trabajo
-- Secretos (K/V)
-- Balance de carga
-- Panel de control / API
-- Automatización
-- Almacenamiento
+| Simple, integrado en Docker | Más complejo, más potente, más estándar |
 
 ---
 

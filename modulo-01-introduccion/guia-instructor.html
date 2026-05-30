@@ -369,7 +369,7 @@
     <nav class="toc">
         <h2>Índice de Contenidos</h2>
         <ol>
-            <li><a href="#sec1">1. Apertura: De Docker a Kubernetes</a></li>
+            <li><a href="#sec1">1. Introducción a Kubernetes</a></li>
             <li><a href="#sec2">2. Conceptos Fundamentales</a></li>
             <li><a href="#sec3">3. Arquitectura del Clúster</a></li>
             <li><a href="#sec4">4. Objetos Principales</a></li>
@@ -382,20 +382,161 @@
 
     <!-- SECTION 1 -->
     <div class="section" id="sec1">
-        <h2>1. Apertura: De Docker a Kubernetes <span class="duration">~10 min</span></h2>
-        
+        <h2>1. Introducción a Kubernetes <span class="duration">~15 min</span></h2>
+
+        <h3>El Problema: ¿Por qué necesitamos esto?</h3>
+
         <div class="key-message">
-            "Ya sabéis orquestar contenedores con Swarm. Kubernetes resuelve los mismos problemas, pero a mayor escala y con más control."
+            Imaginad que tenéis 50 contenedores Docker repartidos en 10 servidores. Es viernes a las 18:00. Uno de los servidores se cae. ¿Quién mueve los contenedores? ¿Quién avisa al load balancer? ¿Quién se queda el viernes?
+        </div>
+
+        <p>Con Docker sabéis empaquetar apps. Con Swarm aprendisteis a distribuirlas. Pero en producción real aparecen problemas que Swarm resuelve "a medias":</p>
+
+        <ul>
+            <li>🔥 Un nodo se cae → ¿quién redistribuye la carga <em>rápido</em>?</li>
+            <li>📈 Black Friday → ¿quién escala de 3 a 30 réplicas <em>automáticamente</em>?</li>
+            <li>🔄 Deploy de nueva versión → ¿cómo hacerlo con <em>cero downtime</em>?</li>
+            <li>🔒 Microservicio A no debería hablar con C → ¿quién controla eso?</li>
+            <li>💾 La base de datos necesita disco que <em>sobreviva</em> al contenedor → ¿cómo?</li>
+        </ul>
+
+        <p><strong>Kubernetes resuelve todos estos problemas.</strong> Y lo hace de forma declarativa: tú describes el estado deseado, K8s se encarga de mantenerlo.</p>
+
+        <h3>Origen: De Google al Mundo</h3>
+
+        <table>
+            <thead><tr><th>Año</th><th>Evento</th></tr></thead>
+            <tbody>
+                <tr><td><strong>2003-2013</strong></td><td>Google ejecuta <em>billones</em> de contenedores/semana con sistemas internos: <strong>Borg</strong> y <strong>Omega</strong></td></tr>
+                <tr><td><strong>2014</strong></td><td>Google libera Kubernetes como open-source (no es Borg, pero hereda sus ideas)</td></tr>
+                <tr><td><strong>Jul 2015</strong></td><td>Kubernetes v1.0 — donado a la CNCF (Cloud Native Computing Foundation)</td></tr>
+                <tr><td><strong>2017-2018</strong></td><td>AWS, Azure y GCP ofrecen K8s gestionado. Docker Inc. añade soporte nativo</td></tr>
+                <tr><td><strong>2020</strong></td><td>Docker Swarm pierde relevancia. K8s es el estándar de facto</td></tr>
+                <tr><td><strong>Hoy</strong></td><td>96% de organizaciones usan o evalúan K8s (CNCF Survey 2023)</td></tr>
+            </tbody>
+        </table>
+
+        <h3>¿Qué es Kubernetes en una frase?</h3>
+
+        <div class="key-message">
+            "Kubernetes es una plataforma portable y extensible de código abierto para administrar cargas de trabajo y servicios. Facilita la automatización y la configuración declarativa."
         </div>
 
         <ul>
-            <li><strong>Kubernetes (K8s)</strong> = plataforma open-source de orquestación de contenedores</li>
-            <li>Creado por Google (2014), basado en experiencia interna (Borg/Omega)</li>
-            <li>Escrito en Go, gestionado por la CNCF</li>
-            <li>Estándar de facto en la industria</li>
+            <li>📦 <strong>Orientada a contenedores</strong> — todo es un contenedor</li>
+            <li>🧩 <strong>Microservicios</strong> — diseñada para apps distribuidas</li>
+            <li>☁️ <strong>Híbrida / Multi-cloud</strong> — funciona igual en cualquier sitio</li>
+            <li>🛠️ <strong>Escrito en Go</strong> — rápido, compilado, concurrente</li>
+            <li>🌍 <strong>Comunidad masiva</strong> — +3.500 contributors, mayor proyecto en GitHub después de Linux</li>
         </ul>
 
-        <h3>Paralelo con Swarm</h3>
+        <h3>El nombre</h3>
+        <p><strong>Kubernetes</strong> (κυβερνήτης) = "timonel" en griego. El que dirige el barco. <strong>K8s</strong> = K + 8 letras + s (abreviatura de la comunidad). El logo es un timón de barco con 7 lados (los 7 "pilares" originales del proyecto).</p>
+
+        <figure class="diagram">
+            <img src="assets/kubernetes-overview.png" alt="Kubernetes Overview">
+            <figcaption>Ecosistema Kubernetes</figcaption>
+        </figure>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="section" id="sec2">
+        <h2>2. Conceptos Fundamentales <span class="duration">~15 min</span></h2>
+
+        <h3>¿Qué es un Orquestador?</h3>
+
+        <p>Pensad en una <strong>orquesta sinfónica</strong>:</p>
+
+        <table>
+            <thead><tr><th>Orquesta</th><th>Kubernetes</th></tr></thead>
+            <tbody>
+                <tr><td>🎵 Músicos</td><td>Contenedores (tu código)</td></tr>
+                <tr><td>🎼 Partitura</td><td>Manifiestos YAML (estado deseado)</td></tr>
+                <tr><td>🎻 Secciones (cuerdas, viento...)</td><td>Servicios, Deployments</td></tr>
+                <tr><td>🪑 Sillas/Atriles</td><td>Nodos (infraestructura)</td></tr>
+                <tr><td>🎩 <strong>Director</strong></td><td><strong>Kubernetes</strong> (el orquestador)</td></tr>
+            </tbody>
+        </table>
+
+        <p>El director no toca ningún instrumento. <strong>Coordina</strong>. Si un músico se equivoca, le corrige. Si falta un violín, busca un sustituto. Si la pieza requiere más volumen, añade instrumentos.</p>
+
+        <div class="key-message">
+            Un orquestador de contenedores hace lo mismo: no ejecuta tu código, pero se asegura de que esté corriendo donde debe, cuando debe, y en la cantidad correcta.
+        </div>
+
+        <h3>Las 7 Capacidades de un Orquestador</h3>
+
+        <table>
+            <thead><tr><th>#</th><th>Capacidad</th><th>Ejemplo real</th><th>¿Swarm lo hace?</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><strong>Scheduling</strong><br><small>Decidir dónde ejecutar cada contenedor</small></td>
+                    <td>"Este pod necesita 2GB RAM → va al nodo que tenga espacio"</td>
+                    <td>✅ Básico</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><strong>Auto-healing</strong><br><small>Recuperarse de fallos automáticamente</small></td>
+                    <td>"El pod murió → reiniciar. El nodo cayó → mover pods a otro"</td>
+                    <td>✅ Básico</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><strong>Auto-scaling</strong><br><small>Escalar según demanda</small></td>
+                    <td>"CPU al 80% → crear 5 réplicas más. Baja al 20% → reducir a 2"</td>
+                    <td>❌ Manual</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><strong>Service Discovery</strong><br><small>Encontrar servicios por nombre</small></td>
+                    <td><code>curl http://api-users:8080</code> → resuelve automáticamente</td>
+                    <td>✅ DNS</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><strong>Load Balancing</strong><br><small>Distribuir tráfico entre réplicas</small></td>
+                    <td>"3 pods de nginx → repartir requests round-robin"</td>
+                    <td>✅ Routing mesh</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><strong>Rolling Updates</strong><br><small>Actualizar sin downtime</small></td>
+                    <td>"Reemplazar v1.2 → v1.3 de a un pod a la vez, sin cortar tráfico"</td>
+                    <td>✅ Básico</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td><strong>Declarative Config</strong><br><small>Describes QUÉ quieres, no CÓMO</small></td>
+                    <td>"Quiero 3 réplicas de nginx:1.25 con 512MB RAM" → K8s lo hace</td>
+                    <td>⚠️ Parcial</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="instructor-note">
+            Preguntar a los alumnos: "¿Cuántas de estas capacidades usáis activamente en Swarm?" — la mayoría dirá 3-4. K8s las tiene todas, más potentes, y además añade: Network Policies, RBAC, CRDs, HPA/VPA, Ingress, etc.
+        </div>
+
+        <h3>Declarativo vs Imperativo</h3>
+
+        <p>La diferencia más importante respecto a trabajar con Docker directamente:</p>
+
+        <table>
+            <thead><tr><th>Imperativo (Docker/Swarm)</th><th>Declarativo (Kubernetes)</th></tr></thead>
+            <tbody>
+                <tr><td>"Arranca 3 contenedores de nginx"<br><code>docker service create --replicas 3 nginx</code></td><td>"Quiero que siempre haya 3 nginx"<br><code>kubectl apply -f deployment.yaml</code></td></tr>
+                <tr><td>Dices <strong>qué hacer</strong></td><td>Dices <strong>cómo debe quedar</strong></td></tr>
+                <tr><td>Si uno muere, tú lo reincias</td><td>Si uno muere, K8s lo recrea solo</td></tr>
+                <tr><td>El estado es "lo que pasó"</td><td>El estado es "lo que debería ser"</td></tr>
+            </tbody>
+        </table>
+
+        <div class="key-message">
+            Kubernetes funciona con un <strong>reconciliation loop</strong>: compara constantemente el estado actual con el estado deseado. Si hay diferencia, actúa. Siempre. 24/7. Sin intervención humana.
+        </div>
+
+        <h3>¿Cómo se traduce esto de Swarm a K8s?</h3>
         <table>
             <thead><tr><th>Docker Swarm</th><th>Kubernetes</th></tr></thead>
             <tbody>
@@ -404,36 +545,9 @@
                 <tr><td>Swarm manager</td><td>Control Plane (API Server)</td></tr>
                 <tr><td>Swarm worker</td><td>Worker Node</td></tr>
                 <tr><td>Overlay network</td><td>CNI plugins (Calico, Flannel, Cilium)</td></tr>
-                <tr><td>Simple, integrado en Docker</td><td>Más complejo, más potente</td></tr>
+                <tr><td>Simple, integrado en Docker</td><td>Más complejo, más potente, más estándar</td></tr>
             </tbody>
         </table>
-    </div>
-
-    <!-- SECTION 2 -->
-    <div class="section" id="sec2">
-        <h2>2. Conceptos Fundamentales <span class="duration">~15 min</span></h2>
-
-        <figure class="diagram">
-            <img src="assets/kubernetes-overview.png" alt="Kubernetes Overview">
-            <figcaption>Visión general de Kubernetes</figcaption>
-        </figure>
-
-        <h3>Qué es un orquestador</h3>
-        <ul>
-            <li>Coordina contenedores en múltiples máquinas</li>
-            <li>Configuración <strong>declarativa</strong> (describes QUÉ quieres, no CÓMO)</li>
-            <li>Auto-healing, auto-scaling, rolling updates</li>
-        </ul>
-
-        <h3>Capacidades principales</h3>
-        <ul>
-            <li>Flujos de trabajo</li>
-            <li>Secretos (K/V)</li>
-            <li>Balance de carga</li>
-            <li>Panel de control / API</li>
-            <li>Automatización</li>
-            <li>Almacenamiento</li>
-        </ul>
     </div>
 
     <!-- SECTION 3 -->
