@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía del Instructor — Introducción a Kubernetes</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --accent-purple: #bc8cff;
+            --code-bg: #1b2028;
+            --table-header: #1c2128;
+            --table-row-alt: #131920;
+            --blockquote-border: #58a6ff;
+            --shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 16px;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 60px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a2332 0%, #0d1117 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 50px 0;
+            margin-bottom: 40px;
+        }
+
+        .header .container {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        .header h1 {
+            font-size: 2.4em;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .header h1 .k8s-icon {
+            display: inline-block;
+            width: 42px;
+            height: 42px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 42px;
+            font-size: 22px;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+
+        .meta-badges {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .badge-blue { border-color: var(--accent-blue); color: var(--accent-blue); }
+        .badge-green { border-color: var(--accent-green); color: var(--accent-green); }
+        .badge-orange { border-color: var(--accent-orange); color: var(--accent-orange); }
+
+        /* Navigation */
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px 30px;
+            margin-bottom: 40px;
+        }
+
+        .toc h2 {
+            font-size: 1.1em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+
+        .toc ol {
+            padding-left: 0;
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .toc li a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-size: 0.95em;
+            padding: 4px 0;
+            display: block;
+            transition: color 0.2s;
+        }
+
+        .toc li a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 50px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        h2 {
+            font-size: 1.7em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-blue);
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 1.25em;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin: 28px 0 14px;
+        }
+
+        h4 {
+            font-size: 1.05em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 20px 0 10px;
+        }
+
+        p {
+            margin-bottom: 14px;
+            color: var(--text-primary);
+        }
+
+        /* Key message boxes */
+        .key-message {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.08) 0%, rgba(88, 166, 255, 0.03) 100%);
+            border-left: 4px solid var(--accent-blue);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .instructor-note {
+            background: linear-gradient(135deg, rgba(210, 153, 34, 0.1) 0%, rgba(210, 153, 34, 0.03) 100%);
+            border-left: 4px solid var(--accent-orange);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+
+        .instructor-note::before {
+            content: "📋 Nota para el instructor";
+            display: block;
+            font-weight: 600;
+            color: var(--accent-orange);
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 12px 0 16px 24px;
+            color: var(--text-primary);
+        }
+
+        li {
+            margin-bottom: 6px;
+            padding-left: 4px;
+        }
+
+        li strong {
+            color: var(--accent-blue);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            font-size: 0.92em;
+        }
+
+        thead {
+            background: var(--table-header);
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        tr:nth-child(even) {
+            background: var(--table-row-alt);
+        }
+
+        tr:hover td {
+            background: rgba(88, 166, 255, 0.04);
+        }
+
+        td strong {
+            color: var(--text-primary);
+        }
+
+        /* Code */
+        code {
+            background: var(--code-bg);
+            color: var(--accent-green);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 0.88em;
+            border: 1px solid var(--border);
+        }
+
+        /* Images */
+        .diagram {
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .diagram img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .diagram figcaption {
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Duration badges */
+        .duration {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2px 10px;
+            font-size: 0.8em;
+            color: var(--text-muted);
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        /* Comparison table special */
+        .comparison-table td:first-child {
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        /* Footer */
+        .footer-notes {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px 30px;
+            margin-top: 40px;
+        }
+
+        .footer-notes h2 {
+            border-bottom-color: var(--accent-orange);
+            font-size: 1.3em;
+        }
+
+        .footer-notes li {
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            .header h1 { font-size: 1.8em; }
+            .toc ol { grid-template-columns: 1fr; }
+            table { font-size: 0.82em; }
+            th, td { padding: 8px 10px; }
+        }
+
+        /* Print */
+        @media print {
+            body { background: white; color: black; }
+            .container { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="container">
+        <h1><span class="k8s-icon">☸</span> Guía del Instructor — Introducción a Kubernetes</h1>
+        <div class="meta-badges">
+            <span class="badge badge-blue">👥 Audiencia: Docker & Swarm users</span>
+            <span class="badge badge-green">⏱ Duración: ~2 horas</span>
+            <span class="badge badge-orange">🎯 Teórico-expositivo</span>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <nav class="toc">
+        <h2>Índice de Contenidos</h2>
+        <ol>
+            <li><a href="#sec1">1. Apertura: De Docker a Kubernetes</a></li>
+            <li><a href="#sec2">2. Conceptos Fundamentales</a></li>
+            <li><a href="#sec3">3. Arquitectura del Clúster</a></li>
+            <li><a href="#sec4">4. Objetos Principales</a></li>
+            <li><a href="#sec5">5. Redes en Kubernetes</a></li>
+            <li><a href="#sec6">6. Almacenamiento</a></li>
+            <li><a href="#sec7">7. Namespaces</a></li>
+            <li><a href="#sec8">8. Resumen y Comparativa</a></li>
+        </ol>
+    </nav>
+
+    <!-- SECTION 1 -->
+    <div class="section" id="sec1">
+        <h2>1. Apertura: De Docker a Kubernetes <span class="duration">~10 min</span></h2>
+        
+        <div class="key-message">
+            "Ya sabéis orquestar contenedores con Swarm. Kubernetes resuelve los mismos problemas, pero a mayor escala y con más control."
+        </div>
+
+        <ul>
+            <li><strong>Kubernetes (K8s)</strong> = plataforma open-source de orquestación de contenedores</li>
+            <li>Creado por Google (2014), basado en experiencia interna (Borg/Omega)</li>
+            <li>Escrito en Go, gestionado por la CNCF</li>
+            <li>Estándar de facto en la industria</li>
+        </ul>
+
+        <h3>Paralelo con Swarm</h3>
+        <table>
+            <thead><tr><th>Docker Swarm</th><th>Kubernetes</th></tr></thead>
+            <tbody>
+                <tr><td><code>docker service create</code></td><td><code>kubectl apply -f deployment.yaml</code></td></tr>
+                <tr><td>Stacks (compose)</td><td>Helm charts / manifiestos YAML</td></tr>
+                <tr><td>Swarm manager</td><td>Control Plane (API Server)</td></tr>
+                <tr><td>Swarm worker</td><td>Worker Node</td></tr>
+                <tr><td>Overlay network</td><td>CNI plugins (Calico, Flannel, Cilium)</td></tr>
+                <tr><td>Simple, integrado en Docker</td><td>Más complejo, más potente</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="section" id="sec2">
+        <h2>2. Conceptos Fundamentales <span class="duration">~15 min</span></h2>
+
+        <figure class="diagram">
+            <img src="assets/kubernetes-overview.png" alt="Kubernetes Overview">
+            <figcaption>Visión general de Kubernetes</figcaption>
+        </figure>
+
+        <h3>Qué es un orquestador</h3>
+        <ul>
+            <li>Coordina contenedores en múltiples máquinas</li>
+            <li>Configuración <strong>declarativa</strong> (describes QUÉ quieres, no CÓMO)</li>
+            <li>Auto-healing, auto-scaling, rolling updates</li>
+        </ul>
+
+        <h3>Capacidades principales</h3>
+        <ul>
+            <li>Flujos de trabajo</li>
+            <li>Secretos (K/V)</li>
+            <li>Balance de carga</li>
+            <li>Panel de control / API</li>
+            <li>Automatización</li>
+            <li>Almacenamiento</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="section" id="sec3">
+        <h2>3. Arquitectura del Clúster <span class="duration">~20 min</span></h2>
+
+        <figure class="diagram">
+            <img src="assets/arquitectura-cluster.png" alt="Arquitectura del Clúster K8s">
+            <figcaption>Arquitectura: Control Plane + Worker Nodes</figcaption>
+        </figure>
+
+        <h3>Control Plane (Master Node)</h3>
+        <p>Equivalente al Swarm Manager, pero con componentes especializados:</p>
+
+        <table>
+            <thead><tr><th>Componente</th><th>Función</th><th>Equivalente Swarm</th></tr></thead>
+            <tbody>
+                <tr><td><strong>kube-apiserver</strong></td><td>API REST, punto de entrada</td><td>Manager API</td></tr>
+                <tr><td><strong>etcd</strong></td><td>Almacén KV distribuido (estado del clúster)</td><td>Raft store interno</td></tr>
+                <tr><td><strong>kube-scheduler</strong></td><td>Decide dónde ejecutar pods</td><td>Scheduler integrado</td></tr>
+                <tr><td><strong>kube-controller-manager</strong></td><td>Mantiene el estado deseado</td><td>Reconciliation loop</td></tr>
+                <tr><td><strong>cloud-controller-manager</strong></td><td>Integración con proveedores cloud</td><td>N/A</td></tr>
+            </tbody>
+        </table>
+
+        <figure class="diagram">
+            <img src="assets/etcd-leader-follower.png" alt="etcd Leader/Follower">
+            <figcaption>etcd: consenso Leader/Follower (Raft)</figcaption>
+        </figure>
+
+        <div class="instructor-note">
+            Explicar que etcd usa consenso Raft (igual que Swarm internamente), pero en K8s es un componente explícito que puedes gestionar por separado.
+        </div>
+
+        <h3>Worker Nodes</h3>
+        <table>
+            <thead><tr><th>Componente</th><th>Función</th><th>Equivalente Swarm</th></tr></thead>
+            <tbody>
+                <tr><td><strong>kubelet</strong></td><td>Agente que ejecuta pods</td><td>Docker daemon + agent</td></tr>
+                <tr><td><strong>kube-proxy</strong></td><td>Reglas de red (iptables/IPVS)</td><td>Routing mesh</td></tr>
+                <tr><td><strong>Container Runtime</strong></td><td>docker, containerd, cri-o</td><td>Docker engine</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div class="section" id="sec4">
+        <h2>4. Objetos Principales <span class="duration">~15 min</span></h2>
+
+        <figure class="diagram">
+            <img src="assets/apps-en-nodos.png" alt="Aplicaciones en Nodos">
+            <figcaption>Pods distribuidos en los Worker Nodes</figcaption>
+        </figure>
+
+        <table>
+            <thead><tr><th>Objeto</th><th>Descripción</th><th>Equivalente Swarm</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Pod</strong></td><td>1+ contenedores, unidad mínima</td><td>Task (un contenedor)</td></tr>
+                <tr><td><strong>Deployment</strong></td><td>Gestiona réplicas, rolling updates</td><td>Service</td></tr>
+                <tr><td><strong>Service</strong></td><td>IP estable + DNS + load balancing</td><td>Service VIP</td></tr>
+                <tr><td><strong>Namespace</strong></td><td>Aislamiento lógico</td><td>N/A (Swarm no tiene)</td></tr>
+                <tr><td><strong>Secret/ConfigMap</strong></td><td>Configuración y secretos</td><td>Docker secrets/configs</td></tr>
+                <tr><td><strong>Volume</strong></td><td>Almacenamiento persistente</td><td>Docker volumes</td></tr>
+            </tbody>
+        </table>
+
+        <figure class="diagram">
+            <img src="assets/apps-detalle.png" alt="Detalle de Aplicaciones">
+            <figcaption>Detalle: pods, contenedores y servicios</figcaption>
+        </figure>
+
+        <h3>Pod vs Container</h3>
+        <ul>
+            <li>En Swarm: 1 task = 1 contenedor</li>
+            <li>En K8s: 1 pod = 1+ contenedores que comparten red y almacenamiento</li>
+            <li>Caso típico: <strong>sidecar patterns</strong> (proxy, logging, etc.)</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 5 -->
+    <div class="section" id="sec5">
+        <h2>5. Redes en Kubernetes <span class="duration">~20 min</span></h2>
+
+        <h3>De monolítico a microservicios</h3>
+
+        <figure class="diagram">
+            <img src="assets/red-monolitica.png" alt="Red Monolítica">
+            <figcaption>App monolítica: no te preocupas por networking</figcaption>
+        </figure>
+
+        <figure class="diagram">
+            <img src="assets/red-dinamica-contenedores.png" alt="Red Dinámica">
+            <figcaption>Con contenedores: Dynamic Network / Service Discovery</figcaption>
+        </figure>
+
+        <h3>Modelo de Red en K8s</h3>
+
+        <figure class="diagram">
+            <img src="assets/red-plana-pods.png" alt="Red Plana">
+            <figcaption>Flat network: todos los pods se comunican sin NAT</figcaption>
+        </figure>
+
+        <ol>
+            <li><strong>Flat network</strong> — todos los pods se ven entre sí sin NAT</li>
+            <li>Cada pod tiene su propia IP</li>
+            <li>La red es software (CNI plugins): Calico, Flannel, Cilium, etc.</li>
+        </ol>
+
+        <div class="instructor-note">
+            En Swarm usas overlay networks explícitas. En K8s la red plana es el default. Destacar esta diferencia.
+        </div>
+
+        <h3>Servicios y Service Discovery</h3>
+
+        <figure class="diagram">
+            <img src="assets/servicios-dns.png" alt="Servicios y DNS">
+            <figcaption>Service Discovery vía DNS interno</figcaption>
+        </figure>
+
+        <ul>
+            <li>Pods son efímeros → no usar IPs directamente</li>
+            <li><strong>Services</strong> proporcionan IP estable + nombre DNS</li>
+            <li>Resolución DNS: <code>mi-servicio.mi-namespace.svc.cluster.local</code></li>
+        </ul>
+
+        <div class="key-message">
+            Esto ya lo conocéis de Swarm (VIP + DNS interno). K8s lo hace igual pero con más opciones.
+        </div>
+
+        <h3>Tipos de Service</h3>
+
+        <figure class="diagram">
+            <img src="assets/clusterip-nodeport.png" alt="ClusterIP y NodePort">
+            <figcaption>ClusterIP (interno) vs NodePort (externo)</figcaption>
+        </figure>
+
+        <table>
+            <thead><tr><th>Tipo</th><th>Acceso</th><th>Equivalente Swarm</th></tr></thead>
+            <tbody>
+                <tr><td><strong>ClusterIP</strong></td><td>Solo interno al clúster</td><td>VIP interna</td></tr>
+                <tr><td><strong>NodePort</strong></td><td>Puerto en cada nodo (30000-32767)</td><td>Published port</td></tr>
+                <tr><td><strong>LoadBalancer</strong></td><td>IP externa (cloud)</td><td>N/A</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Service Network</h3>
+
+        <figure class="diagram">
+            <img src="assets/service-network.png" alt="Service Network">
+            <figcaption>kube-proxy gestiona reglas iptables/IPVS en cada nodo</figcaption>
+        </figure>
+
+        <ul>
+            <li>Los Services no tienen interfaz de red física</li>
+            <li>kube-proxy gestiona reglas iptables/IPVS en cada nodo</li>
+            <li>El tráfico se rutea al pod correcto</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 6 -->
+    <div class="section" id="sec6">
+        <h2>6. Almacenamiento <span class="duration">~10 min</span></h2>
+
+        <figure class="diagram">
+            <img src="assets/almacenamiento-pv-pvc.png" alt="PV y PVC">
+            <figcaption>Modelo de almacenamiento: PV → PVC → Pod</figcaption>
+        </figure>
+
+        <table>
+            <thead><tr><th>Concepto</th><th>Descripción</th><th>Equivalente Swarm</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Volume</strong></td><td>Abstracción de almacenamiento</td><td>Docker volume</td></tr>
+                <tr><td><strong>PersistentVolume (PV)</strong></td><td>Recurso de almacenamiento (disco)</td><td>Volume driver</td></tr>
+                <tr><td><strong>PersistentVolumeClaim (PVC)</strong></td><td>"Ticket" para solicitar un PV</td><td>N/A</td></tr>
+            </tbody>
+        </table>
+
+        <div class="key-message">
+            Diferencia clave: En Swarm montas volúmenes directamente. En K8s hay una capa de abstracción (PV/PVC) que permite provisioning dinámico y portabilidad.
+        </div>
+    </div>
+
+    <!-- SECTION 7 -->
+    <div class="section" id="sec7">
+        <h2>7. Namespaces <span class="duration">~10 min</span></h2>
+
+        <ul>
+            <li>Cluster virtual que agrupa objetos</li>
+            <li>Nombre único dentro del clúster</li>
+            <li>Resource Quotas por namespace</li>
+            <li><strong>Swarm no tiene equivalente</strong> → concepto nuevo para los alumnos</li>
+        </ul>
+
+        <h3>Casos de uso</h3>
+        <ul>
+            <li>Separar entornos (dev/staging/prod) en un solo clúster</li>
+            <li>Aislar equipos/proyectos</li>
+            <li>Limitar recursos por equipo</li>
+        </ul>
+    </div>
+
+    <!-- SECTION 8 -->
+    <div class="section" id="sec8">
+        <h2>8. Resumen y Comparativa <span class="duration">~10 min</span></h2>
+
+        <h3>Docker Swarm vs Kubernetes</h3>
+        <table>
+            <thead><tr><th>Aspecto</th><th>Docker Swarm</th><th>Kubernetes</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Complejidad</strong></td><td>Baja</td><td>Media-Alta</td></tr>
+                <tr><td><strong>Escalabilidad</strong></td><td>Media</td><td>Alta</td></tr>
+                <tr><td><strong>Ecosistema</strong></td><td>Limitado</td><td>Enorme</td></tr>
+                <tr><td><strong>Declarativo</strong></td><td>docker-compose</td><td>YAML manifests</td></tr>
+                <tr><td><strong>Networking</strong></td><td>Overlay + VIP</td><td>CNI + Services + Ingress</td></tr>
+                <tr><td><strong>Storage</strong></td><td>Volumes</td><td>PV/PVC/StorageClass</td></tr>
+                <tr><td><strong>Aislamiento</strong></td><td>N/A</td><td>Namespaces + RBAC</td></tr>
+                <tr><td><strong>Auto-healing</strong></td><td>Sí (básico)</td><td>Sí (avanzado)</td></tr>
+                <tr><td><strong>Auto-scaling</strong></td><td>Manual</td><td>HPA/VPA/Cluster Autoscaler</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Comparativa Completa: Docker Swarm vs Kubernetes vs OpenShift</h3>
+        <table class="comparison-table">
+            <thead><tr><th>Aspecto</th><th>Docker Swarm</th><th>Kubernetes</th><th>OpenShift</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Curva de aprendizaje</strong></td>
+                    <td>Baja. Si sabes Docker, sabes Swarm</td>
+                    <td>Media-Alta. Muchos conceptos nuevos</td>
+                    <td>Alta. K8s + capas adicionales</td>
+                </tr>
+                <tr>
+                    <td><strong>Instalación</strong></td>
+                    <td>Trivial (<code>docker swarm init</code>)</td>
+                    <td>Compleja. Múltiples componentes</td>
+                    <td>Muy compleja. Infraestructura específica</td>
+                </tr>
+                <tr>
+                    <td><strong>Actualizaciones</strong></td>
+                    <td>Manuales, simples</td>
+                    <td>Rolling updates + Helm</td>
+                    <td>OTA via Cluster Version Operator</td>
+                </tr>
+                <tr>
+                    <td><strong>Seguridad</strong></td>
+                    <td>Básica. mTLS entre nodos</td>
+                    <td>RBAC, Network Policies, PSS</td>
+                    <td>Por defecto. SCCs, SELinux, OAuth</td>
+                </tr>
+                <tr>
+                    <td><strong>Redes</strong></td>
+                    <td>Overlay (VXLAN) + routing mesh</td>
+                    <td>CNI plugins (Calico, Flannel, Cilium)</td>
+                    <td>OVN-Kubernetes, preconfigurado</td>
+                </tr>
+                <tr>
+                    <td><strong>Almacenamiento</strong></td>
+                    <td>Docker volumes</td>
+                    <td>PV/PVC/StorageClass (CSI)</td>
+                    <td>K8s + Red Hat ODF</td>
+                </tr>
+                <tr>
+                    <td><strong>Ecosistema</strong></td>
+                    <td>Limitado, en declive</td>
+                    <td>Enorme (CNCF)</td>
+                    <td>Enterprise + Operator Hub</td>
+                </tr>
+                <tr>
+                    <td><strong>Escalado</strong></td>
+                    <td>Manual. Sin auto-scaling</td>
+                    <td>HPA, VPA, Cluster Autoscaler</td>
+                    <td>K8s + Machine API</td>
+                </tr>
+                <tr>
+                    <td><strong>Ideal para</strong></td>
+                    <td>Entornos pequeños, dev local</td>
+                    <td>Multi-cloud, DevOps, flexibilidad</td>
+                    <td>Empresas, soporte, seguridad estricta</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="key-message">
+            "Kubernetes es más complejo que Swarm, pero ya tenéis los conceptos base. OpenShift añade una capa enterprise sobre K8s. En los siguientes módulos vamos a hacer hands-on."
+        </div>
+    </div>
+
+    <!-- FOOTER NOTES -->
+    <div class="footer-notes">
+        <h2>📋 Notas para el Instructor</h2>
+        <ul>
+            <li><strong>No hacer demo práctica en este módulo.</strong> Es puramente conceptual.</li>
+            <li>Preguntar frecuentemente: <em>"¿Cómo haríais esto en Swarm?"</em> para anclar conceptos.</li>
+            <li>Los diagramas están en <code>assets/</code> para proyectar o compartir pantalla.</li>
+            <li>Si los alumnos preguntan por instalación, remitir al Módulo 3.</li>
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>
