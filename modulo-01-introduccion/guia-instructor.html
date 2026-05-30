@@ -445,24 +445,9 @@
 
         <h3>¿Qué es un Orquestador?</h3>
 
-        <p>Pensad en una <strong>orquesta sinfónica</strong>:</p>
+        <p>Ya sabéis lo que hace <code>docker run</code> en una máquina. Un orquestador hace lo mismo, pero a <strong>escala de clúster</strong>: decide dónde correr cada contenedor, los mantiene vivos, los escala, y gestiona su red y almacenamiento. Automáticamente.</p>
 
-        <table>
-            <thead><tr><th>Orquesta</th><th>Kubernetes</th></tr></thead>
-            <tbody>
-                <tr><td>🎵 Músicos</td><td>Contenedores (tu código)</td></tr>
-                <tr><td>🎼 Partitura</td><td>Manifiestos YAML (estado deseado)</td></tr>
-                <tr><td>🎻 Secciones (cuerdas, viento...)</td><td>Servicios, Deployments</td></tr>
-                <tr><td>🪑 Sillas/Atriles</td><td>Nodos (infraestructura)</td></tr>
-                <tr><td>🎩 <strong>Director</strong></td><td><strong>Kubernetes</strong> (el orquestador)</td></tr>
-            </tbody>
-        </table>
-
-        <p>El director no toca ningún instrumento. <strong>Coordina</strong>. Si un músico se equivoca, le corrige. Si falta un violín, busca un sustituto. Si la pieza requiere más volumen, añade instrumentos.</p>
-
-        <div class="key-message">
-            Un orquestador de contenedores hace lo mismo: no ejecuta tu código, pero se asegura de que esté corriendo donde debe, cuando debe, y en la cantidad correcta.
-        </div>
+        <p>En Swarm esto ya lo hacíais, pero de forma limitada. K8s lleva cada capacidad al siguiente nivel:</p>
 
         <h3>Las 7 Capacidades de un Orquestador</h3>
 

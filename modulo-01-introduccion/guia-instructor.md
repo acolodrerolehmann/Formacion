@@ -55,19 +55,9 @@ Con Docker sabéis empaquetar apps. Con Swarm aprendisteis a distribuirlas. Pero
 
 ### ¿Qué es un Orquestador?
 
-Pensad en una **orquesta sinfónica**:
+Ya sabéis lo que hace `docker run` en una máquina. Un orquestador hace lo mismo, pero a **escala de clúster**: decide dónde correr cada contenedor, los mantiene vivos, los escala, y gestiona su red y almacenamiento. Automáticamente.
 
-| Orquesta | Kubernetes |
-|----------|-----------|
-| 🎵 Músicos | Contenedores (tu código) |
-| 🎼 Partitura | Manifiestos YAML (estado deseado) |
-| 🎻 Secciones (cuerdas, viento...) | Servicios, Deployments |
-| 🪑 Sillas/Atriles | Nodos (infraestructura) |
-| 🎩 **Director** | **Kubernetes** (el orquestador) |
-
-El director no toca ningún instrumento. **Coordina**. Si un músico se equivoca, le corrige. Si falta un violín, busca un sustituto. Si la pieza requiere más volumen, añade instrumentos.
-
-> Un orquestador de contenedores hace lo mismo: no ejecuta tu código, pero se asegura de que esté corriendo donde debe, cuando debe, y en la cantidad correcta.
+En Swarm esto ya lo hacíais, pero de forma limitada. K8s lleva cada capacidad al siguiente nivel:
 
 ### Las 7 Capacidades de un Orquestador
 
