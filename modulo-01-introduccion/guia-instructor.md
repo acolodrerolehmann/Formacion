@@ -196,7 +196,21 @@ Casos de uso:
 | Auto-healing | Sí (básico) | Sí (avanzado) |
 | Auto-scaling | Manual | HPA/VPA/Cluster Autoscaler |
 
-**Mensaje final:** "Kubernetes es más complejo que Swarm, pero ya tenéis los conceptos base. En los siguientes módulos vamos a hacer hands-on."
+### Comparativa: Docker Swarm vs Kubernetes vs OpenShift
+
+| Aspecto | Docker Swarm | Kubernetes | OpenShift |
+|---------|-------------|-----------|-----------|
+| **Curva de aprendizaje** | Baja. Si sabes Docker, sabes Swarm | Media-Alta. Muchos conceptos y objetos nuevos | Alta. K8s + capas adicionales de OpenShift |
+| **Instalación** | Trivial (`docker swarm init`) | Compleja. Múltiples componentes (kubeadm, etcd, CNI) | Muy compleja. Requiere infraestructura específica (CoreOS/RHEL), operadores |
+| **Actualizaciones** | Manuales, simples. Un nodo a la vez | Rolling updates nativas. Helm para gestionar versiones | OTA (Over-the-Air) gestionadas por el Cluster Version Operator |
+| **Seguridad** | Básica. TLS mutual entre nodos, secrets encriptados | RBAC, Network Policies, Pod Security Standards. Configuración manual | Seguridad por defecto. SCCs, SELinux, RBAC estricto, OAuth integrado |
+| **Redes** | Overlay networks (VXLAN). Routing mesh integrado | CNI plugins (Calico, Flannel, Cilium). Flexible pero requiere configuración | OpenShift SDN / OVN-Kubernetes. Preconfigured out-of-the-box |
+| **Integración con almacenamiento** | Docker volumes. Limitado a plugins de volumen | PV/PVC/StorageClass. Amplio soporte (CSI drivers) | Igual que K8s + integración nativa con Red Hat storage (ODF) |
+| **Ecosistema** | Limitado. Comunidad pequeña, en declive | Enorme. CNCF, miles de herramientas, estándar de la industria | Enterprise. Catálogo de operadores, pipelines CI/CD integrados (Tekton) |
+| **Escalado** | Manual (`docker service scale`). Sin auto-scaling | HPA, VPA, Cluster Autoscaler. Escalado horizontal y vertical | Igual que K8s + Machine API para escalar infraestructura |
+| **Ideal para** | Entornos pequeños, equipos con poca experiencia ops, desarrollo local | Producción multi-cloud, equipos DevOps, máxima flexibilidad | Empresas que necesitan soporte comercial, seguridad estricta, CI/CD integrado |
+
+**Mensaje final:** "Kubernetes es más complejo que Swarm, pero ya tenéis los conceptos base. OpenShift añade una capa enterprise sobre K8s. En los siguientes módulos vamos a hacer hands-on."
 
 ---
 
