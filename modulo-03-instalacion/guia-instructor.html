@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía del Instructor — Instalación de Kubernetes</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --accent-purple: #bc8cff;
+            --code-bg: #1b2028;
+            --table-header: #1c2128;
+            --table-row-alt: #131920;
+            --blockquote-border: #58a6ff;
+            --shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 16px;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 60px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a2332 0%, #0d1117 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 50px 0;
+            margin-bottom: 40px;
+        }
+
+        .header .container {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        .header h1 {
+            font-size: 2.4em;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .header h1 .k8s-icon {
+            display: inline-block;
+            width: 42px;
+            height: 42px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 42px;
+            font-size: 22px;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+
+        .meta-badges {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .badge-blue { border-color: var(--accent-blue); color: var(--accent-blue); }
+        .badge-green { border-color: var(--accent-green); color: var(--accent-green); }
+        .badge-orange { border-color: var(--accent-orange); color: var(--accent-orange); }
+        .badge-purple { border-color: var(--accent-purple); color: var(--accent-purple); }
+
+        /* Navigation */
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px 30px;
+            margin-bottom: 40px;
+        }
+
+        .toc h2 {
+            font-size: 1.1em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+            border-bottom: none;
+            display: block;
+        }
+
+        .toc ol {
+            padding-left: 0;
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .toc li a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-size: 0.95em;
+            padding: 4px 0;
+            display: block;
+            transition: color 0.2s;
+        }
+
+        .toc li a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 50px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        h2 {
+            font-size: 1.7em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-blue);
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 1.25em;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin: 28px 0 14px;
+        }
+
+        h4 {
+            font-size: 1.05em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 20px 0 10px;
+        }
+
+        p {
+            margin-bottom: 14px;
+            color: var(--text-primary);
+        }
+
+        /* Key message boxes */
+        .key-message {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.08) 0%, rgba(88, 166, 255, 0.03) 100%);
+            border-left: 4px solid var(--accent-blue);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .instructor-note {
+            background: linear-gradient(135deg, rgba(210, 153, 34, 0.1) 0%, rgba(210, 153, 34, 0.03) 100%);
+            border-left: 4px solid var(--accent-orange);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+
+        .instructor-note::before {
+            content: "📋 Nota para el instructor";
+            display: block;
+            font-weight: 600;
+            color: var(--accent-orange);
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+
+        .recommended {
+            background: linear-gradient(135deg, rgba(63, 185, 80, 0.1) 0%, rgba(63, 185, 80, 0.03) 100%);
+            border-left: 4px solid var(--accent-green);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+
+        .recommended::before {
+            content: "✅ Recomendado para este curso";
+            display: block;
+            font-weight: 600;
+            color: var(--accent-green);
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+
+        .warning {
+            background: linear-gradient(135deg, rgba(248, 81, 73, 0.08) 0%, rgba(248, 81, 73, 0.03) 100%);
+            border-left: 4px solid var(--accent-red);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+
+        .warning::before {
+            content: "⚠️ Importante";
+            display: block;
+            font-weight: 600;
+            color: var(--accent-red);
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 12px 0 16px 24px;
+            color: var(--text-primary);
+        }
+
+        li {
+            margin-bottom: 6px;
+            padding-left: 4px;
+        }
+
+        li strong {
+            color: var(--accent-blue);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            font-size: 0.92em;
+        }
+
+        thead {
+            background: var(--table-header);
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        tr:nth-child(even) {
+            background: var(--table-row-alt);
+        }
+
+        tr:hover td {
+            background: rgba(88, 166, 255, 0.04);
+        }
+
+        td strong {
+            color: var(--text-primary);
+        }
+
+        /* Code */
+        code {
+            background: var(--code-bg);
+            color: var(--accent-green);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 0.88em;
+            border: 1px solid var(--border);
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px 22px;
+            margin: 16px 0;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 0.88em;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        /* Cards grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 24px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .card.highlighted {
+            border-color: var(--accent-green);
+            background: linear-gradient(135deg, rgba(63, 185, 80, 0.05) 0%, var(--bg-secondary) 100%);
+        }
+
+        .card h4 {
+            margin-top: 0;
+            color: var(--accent-blue);
+        }
+
+        .card.highlighted h4 {
+            color: var(--accent-green);
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 0.92em;
+            margin-bottom: 10px;
+        }
+
+        .card .pros, .card .cons {
+            font-size: 0.88em;
+            margin: 8px 0 0 16px;
+        }
+
+        .card .pros li { color: var(--accent-green); }
+        .card .cons li { color: var(--accent-orange); }
+
+        /* Duration badges */
+        .duration {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2px 10px;
+            font-size: 0.8em;
+            color: var(--text-muted);
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        /* Comparison table special */
+        .comparison-table td:first-child {
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        /* Footer */
+        .footer-notes {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px 30px;
+            margin-top: 40px;
+        }
+
+        .footer-notes h2 {
+            border-bottom-color: var(--accent-orange);
+            font-size: 1.3em;
+        }
+
+        .footer-notes li {
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            .header h1 { font-size: 1.8em; }
+            .toc ol { grid-template-columns: 1fr; }
+            .cards-grid { grid-template-columns: 1fr; }
+            table { font-size: 0.82em; }
+            th, td { padding: 8px 10px; }
+        }
+
+        /* Print */
+        @media print {
+            body { background: white; color: black; }
+            .container { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="container">
+        <h1><span class="k8s-icon">☸</span> Guía del Instructor — Instalación de Kubernetes</h1>
+        <div class="meta-badges">
+            <span class="badge badge-blue">📦 Módulo 03</span>
+            <span class="badge badge-green">🎯 Objetivo: Kind</span>
+            <span class="badge badge-orange">⏱ Duración: 45-60 min</span>
+            <span class="badge badge-purple">🔧 Nivel: Práctico</span>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- Tabla de contenidos -->
+    <nav class="toc">
+        <h2>Contenido</h2>
+        <ol>
+            <li><a href="#panorama">1. Panorama general de instalación</a></li>
+            <li><a href="#local-docker-desktop">2. Docker Desktop</a></li>
+            <li><a href="#local-podman-desktop">3. Podman Desktop</a></li>
+            <li><a href="#local-minikube">4. Minikube</a></li>
+            <li><a href="#local-kind">5. Kind (elegido para el curso)</a></li>
+            <li><a href="#comparativa-local">6. Comparativa de opciones locales</a></li>
+            <li><a href="#produccion">7. Opciones de producción</a></li>
+            <li><a href="#instalacion-kind">8. Instalación práctica de Kind</a></li>
+        </ol>
+    </nav>
+
+    <!-- Sección 1: Panorama -->
+    <div class="section" id="panorama">
+        <h2>1. Panorama general de instalación</h2>
+        <p>Kubernetes se puede desplegar de muchas formas, desde un clúster local de un solo nodo para desarrollo hasta infraestructura multinodo en la nube para producción. La elección depende del caso de uso:</p>
+
+        <div class="key-message">
+            "No existe una única forma de instalar Kubernetes. La clave está en elegir la herramienta adecuada para el contexto: desarrollo local, CI/CD, o producción."
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Contexto</th>
+                    <th>Necesidad</th>
+                    <th>Opciones típicas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Desarrollo local</strong></td>
+                    <td>Pruebas rápidas, aprendizaje, desarrollo de apps</td>
+                    <td>Kind, Minikube, Docker Desktop, Podman Desktop</td>
+                </tr>
+                <tr>
+                    <td><strong>CI/CD</strong></td>
+                    <td>Clusters efímeros para testing automatizado</td>
+                    <td>Kind, k3d</td>
+                </tr>
+                <tr>
+                    <td><strong>Producción on-premise</strong></td>
+                    <td>Control total, bare-metal o VMs propias</td>
+                    <td>kubeadm, k3s, RKE2, OpenShift</td>
+                </tr>
+                <tr>
+                    <td><strong>Producción cloud</strong></td>
+                    <td>Gestión delegada, escalabilidad, SLA</td>
+                    <td>AKS, EKS, GKE</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Sección 2: Docker Desktop -->
+    <div class="section" id="local-docker-desktop">
+        <h2>2. Docker Desktop</h2>
+        <p>Docker Desktop incluye un clúster Kubernetes integrado de un solo nodo que se activa desde las preferencias de la aplicación. Es la opción más sencilla para quienes ya trabajan con Docker.</p>
+
+        <h3>Características</h3>
+        <ul>
+            <li>Se activa con un checkbox en <strong>Settings → Kubernetes → Enable Kubernetes</strong></li>
+            <li>Usa el mismo Docker daemon para construir imágenes y desplegarlas en K8s</li>
+            <li>Incluye un clúster de un solo nodo con todos los componentes del control plane</li>
+            <li>Integra automáticamente <code>kubectl</code> y configura el contexto</li>
+            <li>Disponible para macOS, Windows y Linux</li>
+        </ul>
+
+        <h3>Ventajas</h3>
+        <ul>
+            <li>Cero configuración adicional — sólo activar el toggle</li>
+            <li>Las imágenes locales están disponibles inmediatamente en el clúster</li>
+            <li>Interfaz gráfica amigable para gestionar recursos</li>
+            <li>Actualización conjunta con Docker Engine</li>
+        </ul>
+
+        <h3>Limitaciones</h3>
+        <ul>
+            <li><strong>Licencia:</strong> Requiere suscripción de pago para empresas con más de 250 empleados o más de $10M de ingresos</li>
+            <li>Solo permite un clúster de un solo nodo (no simula multi-nodo)</li>
+            <li>Consumo elevado de RAM (mínimo ~2 GB extra al activar K8s)</li>
+            <li>No permite configurar versiones específicas de Kubernetes fácilmente</li>
+            <li>No apto para CI/CD ni escenarios automatizados</li>
+        </ul>
+
+        <div class="instructor-note">
+            Muchos alumnos ya tendrán Docker Desktop instalado. Mencionar que es una opción válida para pruebas rápidas pero que para el curso usaremos Kind por su flexibilidad con multi-nodo y reproducibilidad.
+        </div>
+    </div>
+
+    <!-- Sección 3: Podman Desktop -->
+    <div class="section" id="local-podman-desktop">
+        <h2>3. Podman Desktop</h2>
+        <p>Podman Desktop es la alternativa open-source a Docker Desktop. Ofrece compatibilidad con contenedores OCI y tiene soporte experimental para Kubernetes a través de diferentes proveedores.</p>
+
+        <h3>Características</h3>
+        <ul>
+            <li>100% open-source (licencia Apache 2.0) — sin restricciones comerciales</li>
+            <li>No requiere daemon en ejecución (daemonless, rootless por defecto)</li>
+            <li>Soporta Kubernetes a través de extensiones: Kind, Minikube o Lima</li>
+            <li>Interfaz gráfica similar a Docker Desktop con panel de contenedores, pods y volúmenes</li>
+            <li>Compatible con el formato Docker Compose via <code>podman-compose</code></li>
+        </ul>
+
+        <h3>Ventajas</h3>
+        <ul>
+            <li><strong>Sin coste de licencia</strong> — ideal para entornos corporativos</li>
+            <li>Mayor seguridad por defecto (rootless containers)</li>
+            <li>Puede ejecutar pods nativamente (concepto más cercano a K8s)</li>
+            <li>CLI compatible con Docker (<code>alias docker=podman</code>)</li>
+        </ul>
+
+        <h3>Limitaciones</h3>
+        <ul>
+            <li>El soporte de Kubernetes es indirecto (usa Kind o Minikube por detrás)</li>
+            <li>Ecosistema de extensiones menos maduro que Docker Desktop</li>
+            <li>Algunas incompatibilidades sutiles con Docker en builds complejos</li>
+            <li>La experiencia varía entre plataformas (mejor en Linux, más compleja en macOS/Windows)</li>
+        </ul>
+
+        <div class="instructor-note">
+            Podman Desktop es una buena opción para alumnos en empresas que no pueden usar Docker Desktop por licencias. Si algún alumno lo usa, puede instalar Kind dentro de Podman sin problemas.
+        </div>
+    </div>
+
+    <!-- Sección 4: Minikube -->
+    <div class="section" id="local-minikube">
+        <h2>4. Minikube</h2>
+        <p>Minikube es el proyecto oficial de la comunidad Kubernetes para ejecutar un clúster local. Soporta múltiples drivers de virtualización y ofrece gran cantidad de addons integrados.</p>
+
+        <h3>Características</h3>
+        <ul>
+            <li>Proyecto oficial del SIG (Special Interest Group) de Kubernetes</li>
+            <li>Múltiples drivers: Docker, Podman, VirtualBox, HyperKit, Hyper-V, KVM, QEMU</li>
+            <li>Sistema de <strong>addons</strong> integrado: dashboard, ingress, metrics-server, registry, etc.</li>
+            <li>Soporte multi-nodo (experimental) desde la versión 1.10+</li>
+            <li>Permite elegir la versión exacta de Kubernetes a desplegar</li>
+        </ul>
+
+        <h3>Instalación</h3>
+        <pre><code># macOS
+brew install minikube
+
+# Linux
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+# Windows (con chocolatey)
+choco install minikube</code></pre>
+
+        <h3>Uso básico</h3>
+        <pre><code># Crear clúster
+minikube start --driver=docker --kubernetes-version=v1.29.0
+
+# Activar addons
+minikube addons enable ingress
+minikube addons enable metrics-server
+
+# Dashboard web
+minikube dashboard
+
+# Parar y eliminar
+minikube stop
+minikube delete</code></pre>
+
+        <h3>Ventajas</h3>
+        <ul>
+            <li>El más maduro y documentado de todos los entornos locales</li>
+            <li>Gran cantidad de addons listos para usar</li>
+            <li>Soporte multiplataforma excelente</li>
+            <li>Comunidad activa y mantenimiento constante</li>
+        </ul>
+
+        <h3>Limitaciones</h3>
+        <ul>
+            <li>Más lento que Kind en la creación/destrucción de clústeres</li>
+            <li>El soporte multi-nodo es experimental y menos robusto que Kind</li>
+            <li>Usa más recursos que Kind (especialmente con driver de VM)</li>
+            <li>No tan adecuado para CI/CD por el tiempo de arranque</li>
+        </ul>
+
+        <div class="instructor-note">
+            Minikube es la referencia histórica para K8s local. Si algún alumno pregunta por qué no lo usamos: Kind es más rápido, más ligero y soporta multi-nodo nativo con contenedores Docker como nodos.
+        </div>
+    </div>
+
+    <!-- Sección 5: Kind -->
+    <div class="section" id="local-kind">
+        <h2>5. Kind <span class="duration">⭐ Elegido para el curso</span></h2>
+        <p><strong>Kind</strong> (Kubernetes IN Docker) ejecuta nodos de Kubernetes como contenedores Docker. Fue diseñado originalmente para testear el propio Kubernetes y se ha convertido en la opción preferida para desarrollo local y CI/CD.</p>
+
+        <div class="recommended">
+            Kind es la herramienta que usaremos durante todo el curso. Permite crear clústeres multi-nodo en segundos, es extremadamente ligero y reproduce escenarios cercanos a producción sin necesidad de VMs.
+        </div>
+
+        <h3>¿Por qué Kind?</h3>
+        <ul>
+            <li><strong>Multi-nodo real:</strong> Cada nodo es un contenedor Docker — puedes simular 1 control-plane + N workers</li>
+            <li><strong>Rápido:</strong> Crear un clúster tarda ~30 segundos; destruirlo es instantáneo</li>
+            <li><strong>Ligero:</strong> No usa VMs ni hipervisores — solo contenedores</li>
+            <li><strong>Reproducible:</strong> Configuración declarativa en YAML, ideal para CI/CD</li>
+            <li><strong>Versiones:</strong> Permite elegir la versión exacta de K8s con imágenes de nodo</li>
+            <li><strong>Open source:</strong> Proyecto CNCF, sin restricciones de licencia</li>
+        </ul>
+
+        <h3>Instalación</h3>
+        <pre><code># macOS / Linux con Homebrew
+brew install kind
+
+# macOS / Linux con Go
+go install sigs.k8s.io/kind@v0.23.0
+
+# Linux (binario directo)
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
+
+# Windows (con chocolatey)
+choco install kind</code></pre>
+
+        <h3>Requisitos previos</h3>
+        <ul>
+            <li><strong>Docker</strong> o <strong>Podman</strong> instalado y en ejecución</li>
+            <li><code>kubectl</code> instalado (para interactuar con el clúster)</li>
+            <li>Mínimo 4 GB de RAM disponible (recomendado 8 GB para multi-nodo)</li>
+        </ul>
+
+        <h3>Uso básico</h3>
+        <pre><code># Crear un clúster simple (1 nodo)
+kind create cluster --name mi-cluster
+
+# Crear un clúster multi-nodo con fichero de configuración
+kind create cluster --name curso-k8s --config cluster-config.yaml
+
+# Listar clústeres
+kind get clusters
+
+# Obtener kubeconfig
+kind get kubeconfig --name curso-k8s
+
+# Cargar una imagen local al clúster (sin registry)
+kind load docker-image mi-app:latest --name curso-k8s
+
+# Eliminar un clúster
+kind delete cluster --name curso-k8s</code></pre>
+
+        <h3>Configuración multi-nodo (ejemplo del curso)</h3>
+        <pre><code># cluster-config.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
+  - role: worker
+  - role: worker
+  - role: worker</code></pre>
+
+        <h3>Verificación post-instalación</h3>
+        <pre><code># Verificar que el clúster está corriendo
+kubectl cluster-info --context kind-curso-k8s
+
+# Ver los nodos
+kubectl get nodes
+
+# Resultado esperado:
+# NAME                      STATUS   ROLES           AGE   VERSION
+# curso-k8s-control-plane   Ready    control-plane   1m    v1.29.2
+# curso-k8s-worker          Ready    &lt;none&gt;          1m    v1.29.2
+# curso-k8s-worker2         Ready    &lt;none&gt;          1m    v1.29.2
+# curso-k8s-worker3         Ready    &lt;none&gt;          1m    v1.29.2</code></pre>
+
+        <div class="key-message">
+            "Kind nos permite simular un clúster de producción multi-nodo en nuestra máquina local usando solo contenedores Docker. Es la forma más eficiente de aprender Kubernetes sin necesitar infraestructura adicional."
+        </div>
+    </div>
+
+    <!-- Sección 6: Comparativa -->
+    <div class="section" id="comparativa-local">
+        <h2>6. Comparativa de opciones locales</h2>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Característica</th>
+                    <th>Docker Desktop</th>
+                    <th>Podman Desktop</th>
+                    <th>Minikube</th>
+                    <th>Kind ⭐</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Licencia</td>
+                    <td>Comercial (empresas)</td>
+                    <td>Apache 2.0</td>
+                    <td>Apache 2.0</td>
+                    <td>Apache 2.0</td>
+                </tr>
+                <tr>
+                    <td>Multi-nodo</td>
+                    <td>❌ No</td>
+                    <td>⚡ Via Kind/Minikube</td>
+                    <td>⚠️ Experimental</td>
+                    <td>✅ Nativo</td>
+                </tr>
+                <tr>
+                    <td>Velocidad arranque</td>
+                    <td>~60s</td>
+                    <td>~60s</td>
+                    <td>~90-120s</td>
+                    <td>~30s</td>
+                </tr>
+                <tr>
+                    <td>Consumo RAM</td>
+                    <td>Alto (~2 GB+)</td>
+                    <td>Medio</td>
+                    <td>Alto (con VM)</td>
+                    <td>Bajo (~500 MB/nodo)</td>
+                </tr>
+                <tr>
+                    <td>CI/CD friendly</td>
+                    <td>❌</td>
+                    <td>⚠️</td>
+                    <td>⚠️</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Versión K8s configurable</td>
+                    <td>❌ Fija</td>
+                    <td>Depende del provider</td>
+                    <td>✅ Sí</td>
+                    <td>✅ Sí</td>
+                </tr>
+                <tr>
+                    <td>Necesita VM</td>
+                    <td>Sí (HyperKit/WSL2)</td>
+                    <td>Sí (en macOS/Win)</td>
+                    <td>Opcional</td>
+                    <td>❌ Solo Docker</td>
+                </tr>
+                <tr>
+                    <td>Addons integrados</td>
+                    <td>Pocos</td>
+                    <td>Pocos</td>
+                    <td>✅ Muchos</td>
+                    <td>Manual (manifests)</td>
+                </tr>
+                <tr>
+                    <td>Ideal para</td>
+                    <td>Desarrollo rápido</td>
+                    <td>Entornos sin Docker</td>
+                    <td>Aprendizaje general</td>
+                    <td><strong>Cursos, CI/CD, testing</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="instructor-note">
+            Usar esta tabla para justificar la elección de Kind. Los puntos clave son: multi-nodo nativo, velocidad, bajo consumo y que es lo que usa el propio proyecto Kubernetes para sus tests de conformidad.
+        </div>
+    </div>
+
+    <!-- Sección 7: Producción -->
+    <div class="section" id="produccion">
+        <h2>7. Opciones de producción</h2>
+        <p>Aunque el curso se centra en Kind para prácticas locales, es importante conocer las opciones que existen para llevar Kubernetes a producción. Se dividen en tres grandes categorías.</p>
+
+        <h3>7.1 Kubernetes Vanilla (kubeadm)</h3>
+        <p>La instalación "desde cero" del Kubernetes oficial usando <code>kubeadm</code>, la herramienta estándar para crear clústeres en bare-metal o VMs.</p>
+
+        <ul>
+            <li><strong>Qué es:</strong> El Kubernetes upstream sin modificaciones — exactamente lo que publica el proyecto K8s</li>
+            <li><strong>Herramienta:</strong> <code>kubeadm init</code> + <code>kubeadm join</code></li>
+            <li><strong>Responsabilidad del operador:</strong> Networking (CNI), storage, ingress, certificados, upgrades</li>
+        </ul>
+
+        <pre><code># Ejemplo simplificado de instalación con kubeadm
+# En el nodo master:
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+
+# Configurar kubectl
+mkdir -p $HOME/.kube
+sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
+
+# Instalar CNI (ej: Calico)
+kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+# En cada worker:
+sudo kubeadm join &lt;master-ip&gt;:6443 --token &lt;token&gt; --discovery-token-ca-cert-hash sha256:&lt;hash&gt;</code></pre>
+
+        <h4>Ventajas</h4>
+        <ul>
+            <li>Control total sobre cada componente</li>
+            <li>Sin vendor lock-in — es el K8s puro</li>
+            <li>Ideal para aprender los internals de Kubernetes</li>
+        </ul>
+        <h4>Desventajas</h4>
+        <ul>
+            <li>Complejidad operativa alta (upgrades, HA, backups de etcd)</li>
+            <li>No incluye nada "out of the box" — todo se configura manualmente</li>
+            <li>Requiere equipo dedicado para operaciones</li>
+        </ul>
+
+        <h3>7.2 Red Hat OpenShift</h3>
+        <p>OpenShift es la distribución empresarial de Kubernetes más extendida. Añade una capa de opinión y herramientas sobre K8s vanilla orientada a seguridad y operaciones enterprise.</p>
+
+        <ul>
+            <li><strong>Base:</strong> Kubernetes + CRI-O + CoreOS (nodos inmutables)</li>
+            <li><strong>Extras:</strong> Consola web, OAuth integrado, Source-to-Image (S2I), Operators Hub, pipelines CI/CD (Tekton), Service Mesh (Istio)</li>
+            <li><strong>Variantes:</strong> OCP (autoinstalado), ROSA (AWS), ARO (Azure), OSD (dedicado)</li>
+        </ul>
+
+        <h4>Ventajas</h4>
+        <ul>
+            <li>Experiencia "baterías incluidas" — monitoring, logging, registry internos</li>
+            <li>Seguridad reforzada por defecto (SCCs, SELinux, no root)</li>
+            <li>Soporte empresarial de Red Hat</li>
+            <li>Actualizaciones automatizadas del clúster (OTA)</li>
+        </ul>
+        <h4>Desventajas</h4>
+        <ul>
+            <li>Coste de licencia significativo</li>
+            <li>Más restrictivo — algunos workloads necesitan adaptación</li>
+            <li>Curva de aprendizaje adicional sobre K8s estándar</li>
+        </ul>
+
+        <h3>7.3 Azure Kubernetes Service (AKS)</h3>
+        <p>El servicio gestionado de Kubernetes de Microsoft Azure. El control plane es gestionado y gratuito — solo se pagan los nodos worker.</p>
+
+        <ul>
+            <li><strong>Control plane:</strong> Gestionado por Azure (etcd, API server, scheduler, controller-manager)</li>
+            <li><strong>Integraciones:</strong> Azure AD, Azure Monitor, Azure Policy, Azure Container Registry</li>
+            <li><strong>Networking:</strong> Azure CNI o kubenet, con Azure Load Balancer nativo</li>
+        </ul>
+
+        <pre><code># Crear un clúster AKS con Azure CLI
+az aks create \
+  --resource-group mi-grupo \
+  --name mi-cluster-aks \
+  --node-count 3 \
+  --node-vm-size Standard_D2s_v3 \
+  --kubernetes-version 1.29.0 \
+  --generate-ssh-keys
+
+# Obtener credenciales
+az aks get-credentials --resource-group mi-grupo --name mi-cluster-aks</code></pre>
+
+        <h4>Ventajas</h4>
+        <ul>
+            <li>Control plane gratuito — solo pagas los workers</li>
+            <li>Integración nativa con ecosistema Azure</li>
+            <li>Upgrades y parches del control plane automatizados</li>
+            <li>Autoescalado de nodos (Cluster Autoscaler + KEDA)</li>
+        </ul>
+        <h4>Desventajas</h4>
+        <ul>
+            <li>Vendor lock-in con servicios de Azure</li>
+            <li>Configuraciones de red complejas en escenarios híbridos</li>
+            <li>Menos flexibilidad en configuración del control plane</li>
+        </ul>
+
+        <h3>7.4 Amazon Elastic Kubernetes Service (EKS)</h3>
+        <p>El servicio gestionado de AWS, el proveedor cloud más utilizado. Ofrece integración profunda con el ecosistema AWS (IAM, VPC, ALB, etc.).</p>
+
+        <ul>
+            <li><strong>Control plane:</strong> Gestionado por AWS (multi-AZ por defecto)</li>
+            <li><strong>Nodos:</strong> EC2 (managed node groups, self-managed) o Fargate (serverless)</li>
+            <li><strong>Networking:</strong> VPC CNI plugin (IPs de la VPC asignadas directamente a pods)</li>
+        </ul>
+
+        <pre><code># Crear un clúster EKS con eksctl
+eksctl create cluster \
+  --name mi-cluster-eks \
+  --version 1.29 \
+  --region eu-west-1 \
+  --nodegroup-name workers \
+  --node-type t3.medium \
+  --nodes 3
+
+# Obtener credenciales
+aws eks update-kubeconfig --name mi-cluster-eks --region eu-west-1</code></pre>
+
+        <h4>Ventajas</h4>
+        <ul>
+            <li>La mayor cuota de mercado en K8s gestionado</li>
+            <li>Fargate permite pods serverless (sin gestionar nodos)</li>
+            <li>Integración nativa con IAM para RBAC</li>
+            <li>Múltiples opciones de compute (EC2, Fargate, Graviton)</li>
+        </ul>
+        <h4>Desventajas</h4>
+        <ul>
+            <li>El control plane sí tiene coste (~$0.10/hora por clúster)</li>
+            <li>Configuración de networking más compleja que otros proveedores</li>
+            <li>Actualizaciones requieren más intervención manual</li>
+            <li>IAM roles para service accounts puede ser complejo</li>
+        </ul>
+
+        <h3>7.5 K3s — Distribución ligera para edge y on-premise</h3>
+        <p>K3s es una distribución certificada de Kubernetes creada por Rancher (ahora SUSE) que empaqueta todo en un binario de ~70 MB. Ideal para edge computing, IoT, entornos con recursos limitados o instalaciones rápidas en producción.</p>
+
+        <ul>
+            <li><strong>Binario único:</strong> Incluye containerd, flannel, CoreDNS, Traefik y local-path-provisioner</li>
+            <li><strong>Backend de datos:</strong> SQLite (por defecto), MySQL, PostgreSQL o etcd</li>
+            <li><strong>Certificación:</strong> CNCF certified Kubernetes — compatible con cualquier herramienta estándar</li>
+            <li><strong>ARM nativo:</strong> Funciona en Raspberry Pi y dispositivos ARM64</li>
+        </ul>
+
+        <pre><code># Instalación del server (master)
+curl -sfL https://get.k3s.io | sh -
+
+# Unir un worker al clúster
+curl -sfL https://get.k3s.io | K3S_URL=https://&lt;server-ip&gt;:6443 \
+  K3S_TOKEN=&lt;token&gt; sh -
+
+# El token está en /var/lib/rancher/k3s/server/node-token
+
+# Verificar
+sudo k3s kubectl get nodes</code></pre>
+
+        <h4>Ventajas</h4>
+        <ul>
+            <li>Instalación en 30 segundos — un solo comando</li>
+            <li>Consumo mínimo de recursos (~512 MB RAM para server)</li>
+            <li>Ideal para edge, IoT y Raspberry Pi</li>
+            <li>HA disponible con múltiples servers y embedded etcd</li>
+            <li>100% compatible con K8s estándar (es certified)</li>
+        </ul>
+        <h4>Desventajas</h4>
+        <ul>
+            <li>Componentes simplificados (Traefik en lugar de nginx ingress, flannel en lugar de Calico por defecto)</li>
+            <li>Menos adecuado para clústeres muy grandes (100+ nodos)</li>
+            <li>Soporte enterprise requiere Rancher/SUSE</li>
+        </ul>
+
+        <h3>Tabla comparativa — Producción</h3>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Característica</th>
+                    <th>Vanilla (kubeadm)</th>
+                    <th>OpenShift</th>
+                    <th>AKS</th>
+                    <th>EKS</th>
+                    <th>K3s</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Tipo</td>
+                    <td>Self-managed</td>
+                    <td>Enterprise</td>
+                    <td>Cloud managed</td>
+                    <td>Cloud managed</td>
+                    <td>Ligera/Edge</td>
+                </tr>
+                <tr>
+                    <td>Coste</td>
+                    <td>Solo infra</td>
+                    <td>Licencia + infra</td>
+                    <td>Solo workers</td>
+                    <td>CP + workers</td>
+                    <td>Solo infra</td>
+                </tr>
+                <tr>
+                    <td>Complejidad ops</td>
+                    <td>🔴 Alta</td>
+                    <td>🟡 Media</td>
+                    <td>🟢 Baja</td>
+                    <td>🟡 Media</td>
+                    <td>🟢 Baja</td>
+                </tr>
+                <tr>
+                    <td>Control plane</td>
+                    <td>Tú lo gestionas</td>
+                    <td>Semi-gestionado</td>
+                    <td>Azure</td>
+                    <td>AWS</td>
+                    <td>Tú o embebido</td>
+                </tr>
+                <tr>
+                    <td>Multi-cloud</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>❌ Azure</td>
+                    <td>❌ AWS</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Caso de uso</td>
+                    <td>Max control</td>
+                    <td>Enterprise</td>
+                    <td>Azure-native</td>
+                    <td>AWS-native</td>
+                    <td>Edge / IoT / Lab</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="key-message">
+            "En producción, la elección depende del contexto: si estás en una nube pública, usa su servicio gestionado (AKS, EKS, GKE). Si necesitas on-premise con soporte enterprise, OpenShift. Si quieres ligero y rápido, K3s. Si necesitas control total, kubeadm."
+        </div>
+    </div>
+
+    <!-- Sección 8: Instalación práctica -->
+    <div class="section" id="instalacion-kind">
+        <h2>8. Instalación práctica de Kind</h2>
+
+        <h3>Paso 1: Verificar Docker</h3>
+        <pre><code># Comprobar que Docker está corriendo
+docker version
+docker info | grep "Server Version"</code></pre>
+
+        <h3>Paso 2: Instalar Kind</h3>
+        <pre><code># Opción recomendada (macOS/Linux)
+brew install kind
+
+# Verificar instalación
+kind version</code></pre>
+
+        <h3>Paso 3: Instalar kubectl</h3>
+        <pre><code># macOS
+brew install kubectl
+
+# Linux
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+
+# Verificar
+kubectl version --client</code></pre>
+
+        <h3>Paso 4: Crear el clúster del curso</h3>
+        <pre><code># Crear con la configuración multi-nodo
+kind create cluster --name curso-k8s --config cluster-config.yaml
+
+# Verificar
+kubectl get nodes -o wide
+kubectl get pods -A</code></pre>
+
+        <h3>Paso 5: Verificación completa</h3>
+        <pre><code># Desplegar un pod de prueba
+kubectl run test --image=nginx --port=80
+kubectl get pods -w
+
+# Cuando esté Running, verificar acceso
+kubectl port-forward pod/test 8080:80 &amp;
+curl http://localhost:8080
+
+# Limpiar
+kubectl delete pod test</code></pre>
+
+        <div class="warning">
+            Si Docker no está corriendo o no hay suficiente RAM, Kind fallará al crear el clúster. Asegurarse de que los alumnos tienen al menos 4 GB de RAM disponible y Docker activo.
+        </div>
+
+        <div class="instructor-note">
+            Hacer esta parte como demo en vivo. Crear el clúster, mostrar los nodos como contenedores Docker (<code>docker ps</code>) y luego como nodos K8s (<code>kubectl get nodes</code>). Esto refuerza el concepto de que Kind usa contenedores como nodos.
+        </div>
+    </div>
+
+    <!-- Kubeconfig -->
+    <div class="section" id="kubeconfig">
+        <h2>🔑 Kubeconfig</h2>
+
+        <h3>Ubicación</h3>
+        <p>Por defecto se encuentra en <code>~/.kube/config</code>. Se puede sobreescribir con la variable de entorno <code>KUBECONFIG</code> o con el flag <code>--kubeconfig</code>.</p>
+
+        <h3>Componentes del fichero</h3>
+        <pre><code>apiVersion: v1
+kind: Config
+current-context: kind-curso-k8s    # Contexto activo
+
+clusters:                          # Lista de clústeres conocidos
+- cluster:
+    server: https://127.0.0.1:6443 # URL del API Server
+    certificate-authority-data: ... # CA del clúster (base64)
+  name: kind-curso-k8s
+
+users:                             # Credenciales de autenticación
+- user:
+    client-certificate-data: ...   # Certificado cliente (base64)
+    client-key-data: ...           # Clave privada (base64)
+  name: kind-curso-k8s
+
+contexts:                          # Combinación clúster + usuario + namespace
+- context:
+    cluster: kind-curso-k8s
+    user: kind-curso-k8s
+    namespace: default             # Namespace por defecto (opcional)
+  name: kind-curso-k8s</code></pre>
+
+        <h3>Resumen rápido</h3>
+        <table>
+            <tr><th>Sección</th><th>Qué define</th></tr>
+            <tr><td><code>clusters</code></td><td>Dirección del API Server + certificado CA</td></tr>
+            <tr><td><code>users</code></td><td>Credenciales (cert+key, token, o plugin de auth)</td></tr>
+            <tr><td><code>contexts</code></td><td>Asocia un cluster + user + namespace</td></tr>
+            <tr><td><code>current-context</code></td><td>Contexto que usa kubectl por defecto</td></tr>
+        </table>
+
+        <div class="instructor-note">
+            Mostrar el kubeconfig real con <code>kubectl config view</code>. Señalar que cada vez que se crea un clúster Kind se añade automáticamente un contexto nuevo. Explicar que cambiar de clúster es simplemente <code>kubectl config use-context &lt;nombre&gt;</code>.
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-notes">
+        <h2>📝 Resumen y próximos pasos</h2>
+        <ul>
+            <li><strong>Para este curso:</strong> Usaremos Kind con configuración multi-nodo (1 control-plane + 3 workers)</li>
+            <li><strong>Requisitos:</strong> Docker instalado + Kind + kubectl</li>
+            <li><strong>Alternativas locales:</strong> Docker Desktop (rápido pero limitado), Minikube (maduro pero más lento), Podman Desktop (open-source)</li>
+            <li><strong>En producción:</strong> Evaluar AKS/EKS para cloud, OpenShift para enterprise, K3s para edge</li>
+            <li><strong>Siguiente módulo:</strong> Gestión de aplicaciones y redes sobre nuestro clúster Kind</li>
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>

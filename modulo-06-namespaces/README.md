@@ -36,11 +36,9 @@ Kubernetes crea automáticamente cuatro namespaces:
 
 Una estrategia común es crear namespaces separados para dev, staging y producción:
 
-```bash
 kubectl create namespace development
 kubectl create namespace staging
 kubectl create namespace production
-```
 
 Esto permite:
 - Reutilizar el mismo clúster para múltiples entornos
@@ -68,18 +66,13 @@ Esto permite:
 La comunicación intra-namespace es directa por nombre del recurso.
 
 Para comunicación inter-namespace:
-```
 servicio.namespace.svc.cluster.local
-```
 
 Ejemplo: Un pod en `production` accediendo a un servicio en `staging`:
-```
 curl http://api-service.staging.svc.cluster.local:8080
-```
 
 ## Comandos Útiles
 
-```bash
 # Listar namespaces
 kubectl get namespaces
 kubectl get ns
@@ -102,7 +95,6 @@ kubectl describe quota -n <nombre>
 
 # Ver LimitRanges
 kubectl describe limits -n <nombre>
-```
 
 ## Recursos Prácticos
 

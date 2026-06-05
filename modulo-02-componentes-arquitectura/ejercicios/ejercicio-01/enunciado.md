@@ -22,11 +22,9 @@ Completa los manifiestos para que:
 - `nginx` escucha en el puerto `80`.
 
 ## Validación
-```bash
 kubectl apply -f manifests/replicaset.yaml
 kubectl apply -f manifests/service.yaml
 kubectl get rs
 kubectl get pods -l app=nginx
 kubectl get svc
 kubectl describe svc nginx-service
-```

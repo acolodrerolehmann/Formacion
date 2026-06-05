@@ -2,9 +2,7 @@
 
 ## Preparación
 
-```bash
 cd /Users/andres/Formacion/modulo-02-componentes-arquitectura/ejercicios/guiado
-```
 
 Verifica que `kubectl` apunta a un clúster funcional.
 
@@ -12,9 +10,7 @@ Verifica que `kubectl` apunta a un clúster funcional.
 
 1. **Inspeccionar nodos**
 
-   ```bash
    kubectl get nodes -o wide
-   ```
 
    **Explicar:**
    - Diferencia entre control plane y worker.
@@ -23,9 +19,7 @@ Verifica que `kubectl` apunta a un clúster funcional.
 
 2. **Explorar pods del sistema**
 
-   ```bash
    kubectl get pods -n kube-system -o wide
-   ```
 
    **Explicar:**
    - `kube-system` contiene componentes base del clúster.
@@ -34,10 +28,8 @@ Verifica que `kubectl` apunta a un clúster funcional.
 
 3. **Crear un Pod con labels**
 
-   ```bash
    kubectl apply -f manifests/01-pod-labels.yaml
    kubectl get pod pod-etiquetas --show-labels
-   ```
 
    **Explicar:**
    - `metadata.labels` sirve para clasificar recursos.
@@ -45,10 +37,8 @@ Verifica que `kubectl` apunta a un clúster funcional.
 
 4. **Buscar recursos con selectors**
 
-   ```bash
    kubectl get pods -l app=pod-demo --show-labels
    kubectl get pods -l curso=kubernetes,modulo=arquitectura
-   ```
 
    **Explicar:**
    - Selectors por igualdad.
@@ -56,11 +46,9 @@ Verifica que `kubectl` apunta a un clúster funcional.
 
 5. **Crear un ReplicaSet**
 
-   ```bash
    kubectl apply -f manifests/02-replicaset-web.yaml
    kubectl get rs rs-demo-web
    kubectl get pods -l app=rs-demo -o wide
-   ```
 
    **Explicar:**
    - `spec.replicas` define el estado deseado.
@@ -70,14 +58,10 @@ Verifica que `kubectl` apunta a un clúster funcional.
 6. **Demostrar desired state**
 
    **Terminal A**
-   ```bash
    kubectl get pods -l app=rs-demo -w
-   ```
 
    **Terminal B**
-   ```bash
    kubectl delete pod <nombre-de-un-pod-del-rs>
-   ```
 
    **Explicar:**
    - El controlador detecta la desviación.
@@ -86,11 +70,9 @@ Verifica que `kubectl` apunta a un clúster funcional.
 
 7. **Exponer el ReplicaSet con un Service**
 
-   ```bash
    kubectl apply -f manifests/03-service-web.yaml
    kubectl get svc svc-rs-demo
    kubectl get endpoints svc-rs-demo
-   ```
 
    **Explicar:**
    - El Service da una IP estable a Pods cambiantes.
@@ -99,10 +81,8 @@ Verifica que `kubectl` apunta a un clúster funcional.
 
 8. **Explorar APIs disponibles**
 
-   ```bash
    kubectl api-resources
    kubectl api-resources | grep -E 'pods|replicasets|services'
-   ```
 
    **Explicar:**
    - Distinguir `NAME`, `APIVERSION`, `NAMESPACED` y `KIND`.
@@ -110,9 +90,7 @@ Verifica que `kubectl` apunta a un clúster funcional.
 
 9. **Limpiar recursos**
 
-   ```bash
    kubectl delete -f manifests/
-   ```
 
    **Explicar:**
    - Cerrar el ejercicio dejando el clúster limpio.

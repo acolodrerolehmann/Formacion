@@ -21,10 +21,8 @@ Corrige el manifiesto para que:
 - Revisa el label `app` y el label `tier`.
 
 ## Validación
-```bash
 kubectl apply -f manifests/app-broken.yaml
 kubectl get rs
 kubectl get pods --show-labels
 kubectl get svc
 kubectl describe svc tienda-service
-```

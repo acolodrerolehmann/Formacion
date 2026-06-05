@@ -14,7 +14,7 @@
 
 Kubernetes ofrece múltiples formas de instalación según necesidades:
 
-**Kubeadm**: Herramienta oficial para producción en entornos on-premise. Proporciona máximo control y es ideal para clústeres multi-nodo. Requiere gestión manual de certificados y actualización de componentes. Es la opción recomendada para Border & Travel en infraestructura local.
+**Kubeadm**: Herramienta oficial para producción en entornos on-premise. Proporciona máximo control y es ideal para clústeres multi-nodo. Requiere gestión manual de certificados y actualización de componentes. 
 
 **Minikube**: Solución completa para desarrollo local en una sola máquina. Crea un clúster de un nodo con todas las características de Kubernetes. Excelente para aprendizaje y testing en laptop. Soporta múltiples drivers (Docker, VirtualBox, Hyper-V).
 
@@ -59,7 +59,6 @@ Perfecta para integración continua y pruebas rápidas de configuraciones.
 
 ## Comandos útiles
 
-```bash
 # Verificar estado del clúster
 kubectl cluster-info
 kubectl get nodes
@@ -79,7 +78,6 @@ kubectl get events -n kube-system
 # Ver información del clúster
 kubectl version --short
 kubectl api-resources
-```
 
 ## Validación de instalación
 

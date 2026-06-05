@@ -67,7 +67,6 @@ Los DaemonSets se crean automáticamente en nuevos nodos que se unan al cluster.
 
 ## Comandos útiles
 
-```bash
 # Pods
 kubectl run mi-pod --image=nginx                              # Crear pod
 kubectl get pods -o wide                                      # Ver detalles de pods
@@ -92,7 +91,6 @@ kubectl describe statefulset mi-statefulset
 # DaemonSet
 kubectl get daemonsets
 kubectl describe daemonset mi-daemonset
-```
 
 ## Referencias
 

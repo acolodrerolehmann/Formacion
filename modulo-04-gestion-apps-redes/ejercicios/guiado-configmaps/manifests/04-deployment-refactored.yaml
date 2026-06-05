@@ -1,0 +1,37 @@
+# ✅ Deployment REFACTORIZADO usando ConfigMap y Secret
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-refactored
+  labels:
+    app: api-refactored
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-refactored
+  template:
+    metadata:
+      labels:
+        app: api-refactored
+    spec:
+      containers:
+      - name: api
+        image: busybox:1.36
+        command: ["sh", "-c", "echo 'App running with DB_HOST=$DB_HOST DB_USER=$DB_USER' && sleep 3600"]
+        # Inyectar TODO el ConfigMap como variables de entorno
+        envFrom:
+        - configMapRef:
+            name: api-config
+        # Inyectar claves individuales del Secret
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: api-credentials
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: api-credentials
+              key: DB_PASSWORD

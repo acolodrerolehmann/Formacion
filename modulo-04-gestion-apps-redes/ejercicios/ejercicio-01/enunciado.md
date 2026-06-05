@@ -36,24 +36,18 @@ Debes configurar políticas de red para que se cumpla esto:
 
 Obtén los nombres e IPs de los pods:
 
-```bash
 FRONTEND_POD=$(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
 BACKEND_POD=$(kubectl get pod -l app=backend -o jsonpath='{.items[0].metadata.name}')
 FRONTEND_IP=$(kubectl get pod "$FRONTEND_POD" -o jsonpath='{.status.podIP}')
 BACKEND_IP=$(kubectl get pod "$BACKEND_POD" -o jsonpath='{.status.podIP}')
-```
 
 Comprueba que `frontend` sí puede llegar a `backend`:
 
-```bash
 kubectl exec "$FRONTEND_POD" -c toolbox -- wget -qO- "http://$BACKEND_IP:8080"
-```
 
 Comprueba que `backend` no puede llegar a `frontend`:
 
-```bash
 kubectl exec "$BACKEND_POD" -c toolbox -- wget -T 2 -qO- "http://$FRONTEND_IP:8080"
-```
 
 Resultado esperado:
 

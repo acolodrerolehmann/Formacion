@@ -3,7 +3,6 @@
 ## Escenario
 Has recibido un clúster recién instalado. El equipo afirma que la instalación terminó, pero el clúster no está listo para usar. Solo dispones de estas salidas:
 
-```bash
 $ kubectl get nodes
 NAME        STATUS     ROLES           AGE   VERSION
 cp-01       NotReady   control-plane   8m    v1.30.1
@@ -26,7 +25,6 @@ $ kubectl describe node cp-01
 ...
 Ready   False
 Message: container runtime network not ready: NetworkPluginNotReady: cni plugin not initialized
-```
 
 ## Qué debes hacer
 1. Identifica el problema principal.

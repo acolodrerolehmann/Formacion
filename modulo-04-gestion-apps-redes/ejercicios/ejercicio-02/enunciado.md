@@ -34,24 +34,18 @@ Debes publicar ambas con un único `Ingress`:
 
 Aplica los manifiestos:
 
-```bash
 kubectl apply -f manifests/services.yaml
 kubectl apply -f manifests/ingress.yaml
-```
 
 Revisa la configuración:
 
-```bash
 kubectl describe ingress apps-ingress
 kubectl get svc frontend-svc backend-svc
-```
 
 Si tienes un controlador Ingress operativo, comprueba:
 
-```bash
 curl http://<INGRESS_IP>/
 curl http://<INGRESS_IP>/api
-```
 
 Resultado esperado:
 

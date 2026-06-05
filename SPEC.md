@@ -12,7 +12,6 @@ Total: 7 guiados + 14 para resolver = **21 ejercicios**.
 
 ## Estructura del Proyecto
 
-```
 .
 ├── SPEC.md
 ├── README.md                              # Presentación del curso y guía de inicio rápido
@@ -38,7 +37,6 @@ Total: 7 guiados + 14 para resolver = **21 ejercicios**.
 ├── modulo-05-migracion-swarm/
 ├── modulo-06-namespaces/
 └── modulo-07-pods-volumenes-despliegues/
-```
 
 ---
 
@@ -123,7 +121,6 @@ Realizados de forma autónoma por el alumno.
 - Usar labels consistentes: `app`, `module`, `exercise`.
 
 ### Marcadores en ejercicios
-```yaml
 # TODO: Añadir el selector correcto para los pods
 selector:
   matchLabels:
@@ -133,7 +130,6 @@ selector:
 ports:
   - port: 8080       # ← corregir este valor
     targetPort: 80
-```
 
 ---
 

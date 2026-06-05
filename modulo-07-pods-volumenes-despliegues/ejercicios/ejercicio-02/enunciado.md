@@ -24,8 +24,6 @@ Corrige los archivos marcados con `# FIX:` sin crear recursos adicionales.
 2. Añade tolerations para nodos `control-plane` y `master` con `NoSchedule`.
 
 ## Validación sugerida
-```bash
 kubectl apply --dry-run=client -f manifests/statefulset.yaml
 kubectl apply --dry-run=client -f manifests/daemonset.yaml
 kubectl get pods -o wide
-```

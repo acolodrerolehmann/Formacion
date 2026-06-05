@@ -1,0 +1,43 @@
+# FIX: Este Deployment tiene TODA la configuración hardcodeada.
+# El equipo de seguridad ha reportado que las credenciales son visibles.
+# Tu tarea: mover la configuración a ConfigMap y Secret.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-api
+  labels:
+    app: order-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-api
+  template:
+    metadata:
+      labels:
+        app: order-api
+    spec:
+      containers:
+      - name: api
+        image: busybox:1.36
+        command: ["sh", "-c", "echo 'Order API started on port $APP_PORT, connecting to $DB_HOST:$DB_PORT/$DB_NAME as $DB_USER' && sleep 3600"]
+        ports:
+        - containerPort: 8080
+        # FIX: Reemplaza estos env hardcodeados por referencias a ConfigMap y Secret
+        env:
+        - name: DB_HOST
+          value: "postgres.orders.svc.cluster.local"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "orders_production"
+        - name: DB_USER
+          value: "order_service"           # ← SENSIBLE: mover a Secret
+        - name: DB_PASSWORD
+          value: "Pr0d-P@ssw0rd!2024"     # ← SENSIBLE: mover a Secret
+        - name: APP_PORT
+          value: "8080"
+        - name: LOG_LEVEL
+          value: "warn"
+        # TODO: Usa envFrom para inyectar el ConfigMap completo
+        # TODO: Usa valueFrom.secretKeyRef para las credenciales

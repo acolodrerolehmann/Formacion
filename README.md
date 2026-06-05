@@ -7,10 +7,8 @@ Curso de 20 horas teórico-prácticas sobre Kubernetes. Cubre desde conceptos b�
 ## Cómo usar este repositorio
 
 1. **Clona** el repositorio:
-   ```bash
    git clone <url-del-repositorio>
    cd formacion-kubernetes
-   ```
 
 2. **Navega** al módulo correspondiente a la sesión.
 
@@ -19,16 +17,12 @@ Curso de 20 horas teórico-prácticas sobre Kubernetes. Cubre desde conceptos b�
 4. **Ejercicios guiados**: Sigue la `guia-alumno.md` durante la clase.
 
 5. **Ejercicios para resolver**: Lee el `enunciado.md`, edita los manifiestos en `manifests/` y aplica con:
-   ```bash
    kubectl apply -f <archivo>.yaml
-   ```
 
 6. **Verifica** tu solución según el criterio de éxito del enunciado.
 
 7. **Consulta** las soluciones si lo necesitas:
-   ```bash
    git checkout soluciones -- <ruta-al-ejercicio>/soluciones/
-   ```
 
 ## Módulos
 

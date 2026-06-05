@@ -78,7 +78,6 @@ Acceso mediante `kubectl` (cliente CLI) o directamente via HTTP.
 
 ## Comandos Útiles
 
-```bash
 # Inspeccionar componentes del control plane
 kubectl get nodes
 kubectl describe node <nombre-nodo>
@@ -104,7 +103,6 @@ kubectl expose pod <nombre-pod> --type=ClusterIP --port=8080
 # API Server
 kubectl api-resources
 kubectl api-versions
-```
 
 ---
 

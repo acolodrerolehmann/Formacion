@@ -36,7 +36,6 @@
 
 #### Swarm Services → Kubernetes Deployments
 
-```
 Swarm Service:
   - docker service create --replicas 3 my-app
 
@@ -45,7 +44,6 @@ Kubernetes Deployment:
     kind: Deployment
     spec:
       replicas: 3
-```
 
 #### Swarm Networks → Kubernetes Services/NetworkPolicies
 
@@ -78,7 +76,6 @@ Kubernetes Deployment:
 
 Convierte automáticamente `docker-compose.yml` a manifiestos Kubernetes:
 
-```bash
 # Instalación
 curl -L https://github.com/kubernetes/kompose/releases/download/v1.28.0/kompose-linux-amd64 -o kompose
 chmod +x kompose
@@ -88,7 +85,6 @@ chmod +x kompose
 
 # Con generación de Helm
 ./kompose convert -c -f docker-compose.yml
-```
 
 ### Otras herramientas
 
@@ -100,7 +96,6 @@ chmod +x kompose
 
 ## Comandos Útiles
 
-```bash
 # Validar manifiestos antes de desplegar
 kubectl apply -f deployment.yaml --dry-run=client
 
@@ -116,7 +111,6 @@ kubectl exec -it <pod-name> -- /bin/bash
 
 # Rollback de deployments
 kubectl rollout undo deployment/<deployment-name>
-```
 
 ---
 

@@ -6,7 +6,7 @@
 
 ---
 
-## 1. Introducción a Kubernetes (~15 min)
+## 1. Introducción a Kubernetes
 
 ### El Problema: ¿Por qué necesitamos esto?
 
@@ -45,13 +45,13 @@ Con Docker sabéis empaquetar apps. Con Swarm aprendisteis a distribuirlas. Pero
 
 ### El nombre
 
-**Kubernetes** (κυβερνήτης) = "timonel" en griego. El que dirige el barco. **K8s** = K + 8 letras + s. El logo es un timón con 7 lados (los 7 "pilares" originales del proyecto).
+**K8s** = K + 8 letras + s.
 
 ![Kubernetes Overview](assets/kubernetes-overview.png)
 
 ---
 
-## 2. Conceptos Fundamentales (~15 min)
+## 2. Conceptos Fundamentales
 
 ### ¿Qué es un Orquestador?
 
@@ -70,8 +70,6 @@ En Swarm esto ya lo hacíais, pero de forma limitada. K8s lleva cada capacidad a
 | 5 | **Load Balancing** — Distribuir tráfico entre réplicas | "3 pods de nginx → repartir requests round-robin" | ✅ Routing mesh |
 | 6 | **Rolling Updates** — Actualizar sin downtime | "Reemplazar v1.2 → v1.3 un pod a la vez, sin cortar tráfico" | ✅ Básico |
 | 7 | **Declarative Config** — Describes QUÉ, no CÓMO | "Quiero 3 réplicas de nginx:1.25 con 512MB RAM" → K8s lo hace | ⚠️ Parcial |
-
-> **Nota para el instructor:** Preguntar: "¿Cuántas de estas 7 usáis activamente en Swarm?" — la mayoría dirá 3-4. K8s las tiene todas, más potentes, y además añade: Network Policies, RBAC, CRDs, HPA/VPA, Ingress, etc.
 
 ### Declarativo vs Imperativo
 
@@ -98,7 +96,7 @@ En Swarm esto ya lo hacíais, pero de forma limitada. K8s lleva cada capacidad a
 
 ---
 
-## 3. Arquitectura del Clúster (~20 min)
+## 3. Arquitectura del Clúster
 
 ![Arquitectura del Clúster](assets/arquitectura-cluster.png)
 
@@ -116,8 +114,6 @@ Equivalente al Swarm Manager, pero más componentes especializados:
 
 ![etcd Leader/Follower](assets/etcd-leader-follower.png)
 
-> **Nota para el instructor:** Explicar que etcd usa consenso Raft (igual que Swarm internamente), pero en K8s es un componente explícito que puedes gestionar.
-
 ### Worker Nodes
 
 | Componente | Función | Equivalente en Swarm |
@@ -128,7 +124,7 @@ Equivalente al Swarm Manager, pero más componentes especializados:
 
 ---
 
-## 4. Objetos Principales (~15 min)
+## 4. Objetos Principales
 
 ![Aplicaciones en Nodos](assets/apps-en-nodos.png)
 
@@ -150,7 +146,55 @@ Equivalente al Swarm Manager, pero más componentes especializados:
 
 ---
 
-## 5. Redes en Kubernetes (~20 min)
+## 5. Despliegues
+
+En Swarm tenéis `docker service create` para desplegar contenedores con réplicas. En K8s existen **tres controladores** según el tipo de carga de trabajo:
+
+### Deployments (Stateless)
+
+El equivalente directo a un **Service de Swarm**. Gestiona réplicas de pods sin estado.
+
+| Capacidad | Swarm | Kubernetes Deployment |
+|-----------|-------|-----------------------|
+| Réplicas | `--replicas 3` | `replicas: 3` en el manifiesto |
+| Actualización gradual | `--update-delay 10s` | `strategy: RollingUpdate` (configurable) |
+| Rollback | `docker service rollback` | `kubectl rollout undo` (historial completo) |
+| Auto-scaling | ❌ Manual | ✅ HPA (CPU/memoria/métricas custom) |
+
+### DaemonSets (Un pod por nodo)
+
+Garantiza que **un pod corra en cada nodo** del clúster. Cuando se añade un nodo, el DaemonSet despliega automáticamente el pod en él.
+
+| Caso de uso | Ejemplo |
+|-------------|---------|
+| Logging | Fluentd/Filebeat recolectando logs en cada nodo |
+| Monitoreo | Node Exporter (Prometheus) en todos los nodos |
+| Networking | Agentes de CNI, mesh sidecars |
+
+> **Equivalente Swarm:** `docker service create --mode global` → ejecuta una tarea en cada nodo. El DaemonSet es el mismo concepto pero con más control (tolerations, node selectors).
+
+### StatefulSets (Con estado)
+
+Para aplicaciones que necesitan **identidad estable** y **almacenamiento persistente por pod**. A diferencia de un Deployment, los pods no son intercambiables.
+
+| Deployment | StatefulSet |
+|------------|-------------|
+| Pods con nombres aleatorios (deploy-7f8b4-xk2p) | Pods con nombres ordenados (mysql-0, mysql-1, mysql-2) |
+| Sin almacenamiento por pod | Cada pod tiene su propio PVC |
+| Se pueden escalar en cualquier orden | Escalado/actualización secuencial |
+| Ideal: APIs, web servers | Ideal: bases de datos, colas, caches |
+
+### Resumen rápido
+
+| Controlador | ¿Cuándo usarlo? |
+|-------------|-----------------|
+| **Deployment** | Apps sin estado (APIs, frontends, workers) |
+| **DaemonSet** | Agentes que deben correr en todos los nodos |
+| **StatefulSet** | Apps con estado (BBDDs, clusters distribuidos) |
+
+---
+
+## 6. Redes en Kubernetes
 
 ### De monolítico a microservicios
 
@@ -201,9 +245,136 @@ Reglas fundamentales:
 - kube-proxy gestiona reglas iptables/IPVS en cada nodo
 - El tráfico se rutea al pod correcto
 
+### Ingress: Exponiendo servicios al exterior con inteligencia
+
+![Ingress](assets/ingres.png)
+
+**El problema:** `NodePort` expone un puerto por servicio (limitado a 30000-32767). `LoadBalancer` crea un balanceador externo por cada servicio (caro en cloud). ¿Y si tengo 20 microservicios que quiero exponer por HTTP/HTTPS con dominios y paths distintos?
+
+**La solución: Ingress** — un objeto que define reglas de enrutamiento HTTP/HTTPS a nivel de capa 7 (aplicación).
+
+| Concepto | Descripción |
+|----------|-------------|
+| **Ingress** | Recurso declarativo que define reglas de enrutamiento (host, path → Service) |
+| **Ingress Controller** | Componente que implementa esas reglas (nginx, HAProxy, Traefik, Envoy…) |
+
+> **Analogía Swarm:** En Swarm usabais Traefik o nginx-proxy como reverse proxy manual. En K8s, Ingress **estandariza** ese patrón como objeto nativo del API.
+
+#### ¿Cómo funciona?
+
+1. Despliegas un **Ingress Controller** (es un pod que corre un reverse proxy)
+2. Creas recursos **Ingress** que declaran las reglas
+3. El controller lee esas reglas y configura su proxy automáticamente
+4. El tráfico externo llega al controller → se enruta al Service correcto → llega a los pods
+
+#### Ejemplo de recurso Ingress
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mi-app-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: api.miempresa.com
+    http:
+      paths:
+      - path: /usuarios
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-usuarios
+            port:
+              number: 8080
+      - path: /pedidos
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-pedidos
+            port:
+              number: 8080
+  - host: admin.miempresa.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: svc-admin
+            port:
+              number: 3000
+  tls:
+  - hosts:
+    - api.miempresa.com
+    - admin.miempresa.com
+    secretName: mi-tls-secret
+
+> Con un solo punto de entrada, enrutamos tráfico a 3 servicios distintos basándonos en el host y el path. Además, TLS se gestiona de forma centralizada.
+
+#### Ingress según el entorno
+
+| Entorno | Ingress Controller típico | ¿Cómo llega el tráfico al controller? | Notas |
+|---------|--------------------------|---------------------------------------|-------|
+| **Kind** | ingress-nginx (deploy manual) | El controller se expone con `hostPort` o `extraPortMappings` en la config de Kind | Requiere configuración especial en el manifiesto de creación del clúster Kind (`extraPortMappings` para mapear puertos 80/443 del host al nodo) |
+| **Vanilla K8s (kubeadm, bare-metal)** | ingress-nginx, Traefik, HAProxy | El controller se despliega como `DaemonSet` o `Deployment` con `hostNetwork: true` o un Service `NodePort`/`LoadBalancer` (MetalLB) | Sin cloud, necesitas MetalLB o similar para simular un LoadBalancer. Alternativa: `NodePort` + DNS apuntando a los nodos |
+| **OpenShift** | **Router (HAProxy)** — preinstalado | OpenShift usa **Routes** en lugar de Ingress (concepto anterior que inspiró Ingress). Soporta Ingress también, pero lo traduce a Routes internamente | Las Routes soportan TLS edge/passthrough/reencrypt, sticky sessions, y blue-green/canary nativo. El Router escucha en puertos 80/443 de nodos infra |
+| **Cloud (EKS/GKE/AKS)** | AWS ALB Controller, GCE Ingress, Azure AGIC | Se provisiona automáticamente un Load Balancer del cloud provider al crear el Ingress | Cada Ingress puede crear un ALB/NLB (AWS), HTTP(S) LB (GCP), o Application Gateway (Azure). Integración nativa con certificados del cloud |
+
+#### Kind: configuración especial
+
+# Manifiesto de creación del clúster Kind
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 80
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 443
+    protocol: TCP
+
+Después se instala el controller:
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+
+#### OpenShift: Routes vs Ingress
+
+# Route nativa de OpenShift (equivalente a Ingress)
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: mi-app-route
+spec:
+  host: app.apps.mi-cluster.example.com
+  to:
+    kind: Service
+    name: mi-servicio
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+
+#### Resumen Ingress
+
+- **Sin Ingress:** 1 LoadBalancer por servicio → caro y difícil de gestionar
+- **Con Ingress:** 1 punto de entrada → reglas inteligentes L7 → N servicios
+- Es el equivalente a un **reverse proxy automatizado** por Kubernetes
+- El Ingress Controller es un componente que hay que instalar (no viene por defecto en vanilla K8s)
+
 ---
 
-## 6. Almacenamiento (~10 min)
+## 7. Almacenamiento
 
 ![PV y PVC](assets/almacenamiento-pv-pvc.png)
 
@@ -217,7 +388,7 @@ Reglas fundamentales:
 
 ---
 
-## 7. Namespaces (~10 min)
+## 8. Namespaces
 
 - Cluster virtual que agrupa objetos
 - Nombre único dentro del clúster
@@ -231,7 +402,72 @@ Casos de uso:
 
 ---
 
-## 8. Resumen y Transición (~10 min)
+## 9. Migración de Docker Swarm a Kubernetes
+
+> "Ya sabéis que K8s es más potente que Swarm. Ahora la pregunta es: ¿cómo migráis lo que ya tenéis en Swarm sin romper producción?"
+
+### Estrategia de Migración Incremental
+
+1. **Inventariar** — Listar todos los servicios Swarm, sus dependencias, volúmenes y secrets
+2. **Priorizar** — Empezar por workloads stateless y no críticos (frontends, APIs internas)
+3. **Convertir** — Traducir compose/stacks a manifiestos K8s (manual o con herramientas)
+4. **Validar en staging** — Probar en un namespace de prueba antes de producción
+5. **Migrar datos** — Planificar la migración de volúmenes/BBDD (lo más delicado)
+6. **Cutover** — Cambiar DNS/tráfico al clúster K8s
+7. **Decommission** — Apagar Swarm cuando todo funcione
+
+### Mapeo Detallado de Conceptos
+
+| Docker Swarm | Kubernetes | Notas |
+|---|---|---|
+| `docker service create` | `Deployment` + `Service` | En K8s son dos objetos separados |
+| `docker stack deploy -c compose.yml` | `kubectl apply -f` o `helm install` | Helm = compose con esteroides |
+| `docker secret create` | `Secret` | K8s añade RBAC y encryption at-rest |
+| `docker config create` | `ConfigMap` | Mismo concepto, más flexible |
+| Overlay networks | CNI + NetworkPolicies | K8s usa red plana + políticas explícitas |
+| `--mode global` | `DaemonSet` | Un pod por nodo |
+| `--replicas N` | `Deployment` con `replicas: N` | Idéntico concepto |
+| Published ports | `Service` (NodePort/LoadBalancer) o `Ingress` | Ingress es más potente que puertos expuestos |
+| Health checks en compose | `livenessProbe` / `readinessProbe` | K8s separa "está vivo" de "puede recibir tráfico" |
+| Volúmenes nombrados | `PersistentVolumeClaim` | Abstracción PV/PVC para portabilidad |
+| `docker service scale` | `kubectl scale` o HPA | K8s puede escalar automáticamente |
+
+### Herramienta: Kompose
+
+Convierte `docker-compose.yml` a manifiestos K8s automáticamente:
+
+# Instalación
+brew install kompose   # macOS
+# o: curl -L https://github.com/kubernetes/kompose/releases/latest/download/kompose-linux-amd64 -o kompose
+
+# Conversión básica
+kompose convert -f docker-compose.yml
+
+# Genera: deployment.yaml + service.yaml por cada servicio del compose
+
+**Limitaciones de Kompose** (explicar):
+- No genera Ingress (hay que añadirlo manualmente)
+- Los health checks se pierden o se traducen incorrectamente
+- Los volúmenes nombrados se convierten en PVCs pero sin StorageClass
+- No gestiona secrets de forma segura (los pone como env vars)
+- Es un punto de partida, NO el resultado final
+
+> **Recomendación:** Usar Kompose para el primer borrador, luego ajustar manualmente.
+
+### Buenas Prácticas
+
+| Práctica | Por qué |
+|----------|---------|
+| Migrar incrementalmente | Reduce riesgo. Si algo falla, solo afecta a un servicio |
+| Definir resource requests/limits | Swarm no los hereda; K8s los necesita para scheduling |
+| Usar Ingress en vez de puertos | Más limpio, más seguro, TLS centralizado |
+| Separar secrets del código | En Swarm muchos ponen secrets en el compose; en K8s usar objetos Secret |
+| Probar rollbacks antes de migrar | Asegurar que `kubectl rollout undo` funciona correctamente |
+| Documentar el mapping | Crear tabla "servicio Swarm → recurso K8s" para el equipo |
+
+---
+
+## 10. Resumen y Transición
 
 **Tabla resumen para cerrar:**
 
@@ -263,11 +499,3 @@ Casos de uso:
 
 **Mensaje final:** "Kubernetes es más complejo que Swarm, pero ya tenéis los conceptos base. OpenShift añade una capa enterprise sobre K8s. En los siguientes módulos vamos a hacer hands-on."
 
----
-
-## Notas para el Instructor
-
-- **No hacer demo práctica en este módulo.** Es puramente conceptual.
-- Preguntar frecuentemente: "¿Cómo haríais esto en Swarm?" para anclar conceptos.
-- Los diagramas están en `assets/` para proyectar o compartir pantalla.
-- Si los alumnos preguntan por instalación, remitir al Módulo 3.

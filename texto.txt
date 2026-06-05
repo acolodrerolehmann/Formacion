@@ -22,24 +22,28 @@ diferencias y buenas prácticas.
 de entornos y políticas de acceso.
 8. Crear y gestionar pods, volúmenes, deployments, StatefulSets y DaemonSets para
 aplicaciones con y sin estado.
+
+
 Temario:
 1.- Introducción a Kubernetes
-2.- Componentes y arquitectura
- Pods: unidad mínima de despliegue.
 
- Labels / selectors: organización y selección de pods.
- Replication Controllers / ReplicaSets: mantener pods en ejecución.
- Nodos: tipos y función dentro del clúster.
- Servicios (Services): comunicación entre pods y exposición de aplicaciones.
- APIs disponibles: interacción y automatización mediante la API de Kubernetes.
+2.- Componentes y arquitectura
+    Pods: unidad mínima de despliegue.
+
+Labels / selectors: organización y selección de pods.
+Replication Controllers / ReplicaSets: mantener pods en ejecución.
+Nodos: tipos y función dentro del clúster.
+Servicios (Services): comunicación entre pods y exposición de aplicaciones.
+APIs disponibles: interacción y automatización mediante la API de Kubernetes.
+
 3.- Instalación de Kubernetes
- Configuración on-premise / local para el producto Border &amp; Travel.
- Herramientas de instalación (kubeadm, minikube, kind).
- Validación de clúster y componentes básicos.
+Configuración on-premise / local para el producto Border &amp; Travel.
+Herramientas de instalación (kubeadm, minikube, kind).
+Validación de clúster y componentes básicos.
 4.- Gestión de aplicaciones, redes y extensibilidad
- Despliegues con Helm / operadores
-o Uso de Helm para empaquetar aplicaciones.
-o Operadores para automatizar tareas complejas y gestión de aplicaciones.
+    Despliegues con Helm / operadores
+    o Uso de Helm para empaquetar aplicaciones.
+    o Operadores para automatizar tareas complejas y gestión de aplicaciones.
  Redes y Network Policies
 o Modelo de red en Kubernetes.
 o Definición de políticas de red para control de tráfico entre pods.
@@ -54,18 +58,19 @@ o Extensión de la API de Kubernetes con recursos personalizados.
 o Base para crear operadores y automatizar flujos complejos.
 
 5.- Migración de Docker Swarm a Kubernetes
- Diferencias arquitectónicas y conceptuales.
- Similaridades y facilidades de transición.
+ Diferencias arquitectónicas y conceptuales.
+Similaridades y facilidades de transición.
 
- Puntos críticos y buenas prácticas para la migración.
+Puntos críticos y buenas prácticas para la migración.
+
 6.- Namespaces
- Concepto de namespaces y aislamiento de recursos.
- Gestión de múltiples entornos en un mismo clúster.
- Políticas de acceso y límites de recursos por namespace.
+Concepto de namespaces y aislamiento de recursos.
+Gestión de múltiples entornos en un mismo clúster.
+Políticas de acceso y límites de recursos por namespace.
+
 7.- Crear pods, volúmenes y despliegues
- Pods: definición y creación manual.
- Volúmenes: persistencia de datos, tipos de volúmenes (emptyDir, hostPath,
+Pods: definición y creación manual.
+Volúmenes: persistencia de datos, tipos de volúmenes (emptyDir, hostPath,
 PersistentVolume).
- Deployments: estrategias de despliegue, escalado automático y actualizaciones.
-Duración:
-20 horas teórico-prácticas
+Deployments: estrategias de despliegue, escalado automático y actualizaciones.
+

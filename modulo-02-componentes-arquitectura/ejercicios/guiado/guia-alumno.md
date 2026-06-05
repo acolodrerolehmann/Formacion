@@ -13,9 +13,7 @@ Explorar componentes básicos del clúster y practicar con Pods, labels, selecto
 
 Ejecuta todo desde este directorio:
 
-```bash
 cd /Users/andres/Formacion/modulo-02-componentes-arquitectura/ejercicios/guiado
-```
 
 ---
 
@@ -23,9 +21,7 @@ cd /Users/andres/Formacion/modulo-02-componentes-arquitectura/ejercicios/guiado
 
 **Comando**
 
-```bash
 kubectl get nodes -o wide
-```
 
 **Qué hace**
 
@@ -43,9 +39,7 @@ Lista los nodos del clúster con más detalle: rol, versión, IP interna y runti
 
 **Comando**
 
-```bash
 kubectl get pods -n kube-system -o wide
-```
 
 **Qué hace**
 
@@ -63,10 +57,8 @@ Muestra los pods que forman parte del funcionamiento base del clúster.
 
 **Comandos**
 
-```bash
 kubectl apply -f manifests/01-pod-labels.yaml
 kubectl get pod pod-etiquetas --show-labels
-```
 
 **Qué hace**
 
@@ -84,10 +76,8 @@ Crea un Pod simple basado en `nginx` y muestra sus etiquetas.
 
 **Comandos**
 
-```bash
 kubectl get pods -l app=pod-demo --show-labels
 kubectl get pods -l curso=kubernetes,modulo=arquitectura
-```
 
 **Qué hace**
 
@@ -104,11 +94,9 @@ Filtra recursos por labels. El segundo comando combina dos condiciones.
 
 **Comandos**
 
-```bash
 kubectl apply -f manifests/02-replicaset-web.yaml
 kubectl get rs rs-demo-web
 kubectl get pods -l app=rs-demo -o wide
-```
 
 **Qué hace**
 
@@ -128,23 +116,17 @@ Abre una segunda terminal en el mismo directorio.
 
 **Terminal A**
 
-```bash
 kubectl get pods -l app=rs-demo -w
-```
 
 **Terminal B**
 
 1. Lista los Pods actuales:
 
-   ```bash
    kubectl get pods -l app=rs-demo
-   ```
 
 2. Elimina uno de ellos:
 
-   ```bash
    kubectl delete pod <nombre-de-un-pod-del-rs>
-   ```
 
 **Qué hace**
 
@@ -162,11 +144,9 @@ El ReplicaSet detecta que falta una réplica y crea otra automáticamente.
 
 **Comandos**
 
-```bash
 kubectl apply -f manifests/03-service-web.yaml
 kubectl get svc svc-rs-demo
 kubectl get endpoints svc-rs-demo
-```
 
 **Qué hace**
 
@@ -184,10 +164,8 @@ Crea un `Service` de tipo `ClusterIP` que apunta a los Pods del ReplicaSet usand
 
 **Comandos**
 
-```bash
 kubectl api-resources
 kubectl api-resources | grep -E 'pods|replicasets|services'
-```
 
 **Qué hace**
 
@@ -205,9 +183,7 @@ Lista los recursos disponibles en la API de Kubernetes y filtra los más usados 
 
 **Comando**
 
-```bash
 kubectl delete -f manifests/
-```
 
 **Qué hace**
 

@@ -22,9 +22,7 @@ Completa los manifiestos para crear un almacenamiento persistente y montarlo en 
 8. Mantén `persistentVolumeReclaimPolicy: Retain`.
 
 ## Validación sugerida
-```bash
 kubectl apply -f manifests/
 kubectl get pv,pvc
 kubectl get deployments,pods
 kubectl describe pod <nombre-del-pod>
-```

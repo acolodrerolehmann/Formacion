@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: voyager
+  labels:
+    app: voyager
+    component: backend
+data:
+  DB_HOST: "postgres-svc"
+  DB_PORT: "5432"
+  DB_NAME: "voyager"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-nginx-config
+  namespace: voyager
+  labels:
+    app: voyager
+    component: frontend
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name localhost;
+
+        root /usr/share/nginx/html;
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        location /api/ {
+            proxy_pass http://backend-svc:5000/api/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: voyager
+  labels:
+    app: voyager
+    component: database
+data:
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS trips (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(200) NOT NULL,
+        description TEXT,
+        destination VARCHAR(100) NOT NULL,
+        price DECIMAL(10,2) NOT NULL,
+        departure_date DATE NOT NULL,
+        duration_days INTEGER NOT NULL,
+        available_seats INTEGER NOT NULL DEFAULT 20,
+        image_url VARCHAR(500),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    INSERT INTO trips (title, description, destination, price, departure_date, duration_days, available_seats, image_url) VALUES
+    ('Aventura en Tokio', 'Descubre la fascinante mezcla de tradición y modernidad en la capital japonesa.', 'Tokio, Japón', 2499.99, '2026-09-15', 10, 15, 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800'),
+    ('Santorini Romántico', 'Puestas de sol inolvidables en las islas griegas más icónicas.', 'Santorini, Grecia', 1899.50, '2026-07-20', 7, 12, 'https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=800'),
+    ('Machu Picchu Místico', 'Camina por el sendero inca hasta la ciudadela perdida de los incas.', 'Cusco, Perú', 2150.00, '2026-08-10', 8, 18, 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=800'),
+    ('Safari en Kenia', 'Vive la experiencia de ver los Big Five en su hábitat natural.', 'Masái Mara, Kenia', 3200.00, '2026-10-05', 12, 10, 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800'),
+    ('Aurora Boreal en Islandia', 'Persigue las luces del norte entre géiseres y cascadas.', 'Reikiavik, Islandia', 2750.00, '2026-11-20', 6, 8, 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800');

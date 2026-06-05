@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-api-config
+# TODO: Añade la sección 'data' con las claves no sensibles:
+# - DB_HOST (host del servicio PostgreSQL)
+# - DB_PORT (puerto de PostgreSQL)
+# - DB_NAME (nombre de la base de datos)
+# - APP_PORT (puerto en el que escucha la API)
+# - LOG_LEVEL (nivel de logging)

@@ -16,32 +16,24 @@ Crear un clúster local de Kubernetes con kind, validarlo con `kubectl`, despleg
 ## Paso 1. Verificar herramientas base
 Comprueba que Docker y `kubectl` están disponibles.
 
-```bash
 docker info >/dev/null && echo "Docker OK"
 kubectl version --client
 kind --version
-```
 
 Si `kind --version` responde, sigue al paso 3.
 
 ## Paso 2. Instalar kind si no está disponible
 ### Opción A. macOS con Homebrew
-```bash
 brew install kind
-```
 
 ### Opción B. Linux
-```bash
 curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-amd64
 chmod +x ./kind
 sudo mv ./kind /usr/local/bin/kind
-```
 
 Verifica la instalación:
 
-```bash
 kind --version
-```
 
 ## Paso 3. Revisar la configuración del clúster
 Abre el archivo y localiza estos puntos:
@@ -49,16 +41,12 @@ Abre el archivo y localiza estos puntos:
 - 2 nodos `worker`
 - Mapeo del puerto local `8080` al `NodePort 30080`
 
-```bash
 cat manifests/kind-cluster.yaml
-```
 
 ## Paso 4. Crear el clúster
 Ejecuta el siguiente comando desde esta carpeta:
 
-```bash
 kind create cluster --name m3-kind --config manifests/kind-cluster.yaml
-```
 
 Qué debe ocurrir:
 - kind crea tres contenedores Docker
@@ -68,10 +56,8 @@ Qué debe ocurrir:
 ## Paso 5. Verificar que el clúster está operativo
 Consulta la información básica del clúster:
 
-```bash
 kubectl cluster-info --context kind-m3-kind
 kubectl get nodes -o wide
-```
 
 Resultado esperado:
 - se muestra la URL del API Server
@@ -81,16 +67,12 @@ Resultado esperado:
 ## Paso 6. Desplegar una aplicación de prueba
 Aplica el manifiesto del ejercicio:
 
-```bash
 kubectl apply -f manifests/test-app.yaml
-```
 
 Comprueba el despliegue:
 
-```bash
 kubectl -n demo rollout status deployment/web
 kubectl -n demo get all
-```
 
 Resultado esperado:
 - namespace `demo` creado
@@ -100,25 +82,19 @@ Resultado esperado:
 ## Paso 7. Probar acceso a la aplicación
 El clúster expone el servicio en el puerto local `8080`.
 
-```bash
 curl -I http://localhost:8080
-```
 
 Resultado esperado:
 - respuesta `HTTP/1.1 200 OK` o `HTTP/2 200`
 
 Si falla, espera unos segundos y repite. También puedes revisar los pods:
 
-```bash
 kubectl -n demo get pods -o wide
-```
 
 ## Paso 8. Explorar los componentes del clúster
 Lista los pods del namespace del sistema:
 
-```bash
 kubectl get pods -n kube-system -o wide
-```
 
 Identifica al menos estos componentes:
 - `coredns`
@@ -136,16 +112,12 @@ Pregunta guía:
 ## Paso 9. Limpiar el entorno
 Elimina la aplicación y después el clúster:
 
-```bash
 kubectl delete -f manifests/test-app.yaml
 kind delete cluster --name m3-kind
-```
 
 Verifica que ya no existe:
 
-```bash
 kind get clusters
-```
 
 Resultado esperado:
 - `m3-kind` ya no aparece en la lista

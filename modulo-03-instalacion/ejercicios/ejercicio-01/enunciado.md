@@ -17,9 +17,7 @@ Completar el archivo `manifests/kind-config.yaml` y crear un clúster con kind.
 ## Tareas
 1. Completa todos los `# TODO:` de `manifests/kind-config.yaml`.
 2. Crea el clúster con:
-   ```bash
    kind create cluster --name m3-kind --config manifests/kind-config.yaml
-   ```
 3. Verifica que aparecen 4 nodos con `kubectl get nodes`.
 4. Confirma que el nodo `control-plane` tiene los puertos publicados.
 

@@ -14,44 +14,30 @@ Levantar un clúster local con kind, validarlo y eliminarlo.
 
 ## Flujo rápido
 1. Verificar herramientas:
-   ```bash
    docker info >/dev/null && echo "Docker OK"
    kubectl version --client
    kind --version
-   ```
 2. Si `kind` no existe:
    - macOS: `brew install kind`
    - Linux:
-     ```bash
      curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-amd64
      chmod +x ./kind
      sudo mv ./kind /usr/local/bin/kind
-     ```
 3. Crear clúster:
-   ```bash
    kind create cluster --name m3-kind --config manifests/kind-cluster.yaml
-   ```
 4. Verificar:
-   ```bash
    kubectl cluster-info --context kind-m3-kind
    kubectl get nodes -o wide
-   ```
 5. Desplegar app:
-   ```bash
    kubectl apply -f manifests/test-app.yaml
    kubectl -n demo rollout status deployment/web
    kubectl -n demo get all
    curl -I http://localhost:8080
-   ```
 6. Explorar componentes:
-   ```bash
    kubectl get pods -n kube-system -o wide
-   ```
 7. Limpiar:
-   ```bash
    kubectl delete -f manifests/test-app.yaml
    kind delete cluster --name m3-kind
-   ```
 
 ## Resultados esperados
 - 3 nodos en estado `Ready`
