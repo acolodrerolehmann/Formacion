@@ -44,7 +44,10 @@ Verificar: `kubectl version --client`
 
 Cambiar de cluster y namespace sin escribir `kubectl config use-context ...` cada vez.
 
-    brew install kubectx
+| Sistema | Comando |
+|---------|---------|
+| macOS | `brew install kubectx` |
+| Linux (Ubuntu/Debian) | `sudo apt install kubectx` |
 
 Uso:
 
@@ -56,15 +59,32 @@ Uso:
     kubens kube-system           # cambiar namespace
     kubens -                     # volver al anterior
 
-En Linux si no hay paquete:
-
-    git clone https://github.com/ahmetb/kubectx.git ~/.kubectx
-    ln -s ~/.kubectx/kubectx /usr/local/bin/kubectx
-    ln -s ~/.kubectx/kubens /usr/local/bin/kubens
+Verificar: `kubectx --help && kubens --help`
 
 ### krew (gestor de plugins de kubectl)
 
-    brew install krew
+| Sistema | Comando |
+|---------|---------|
+| macOS | `brew install krew` |
+| Linux | Ver script de instalación abajo |
+
+Instalación en Linux (requiere `git` y `curl`):
+
+    (
+      set -x; cd "$(mktemp -d)" &&
+      OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+      ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+      KREW="krew-${OS}_${ARCH}" &&
+      curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+      tar zxvf "${KREW}.tar.gz" &&
+      ./"${KREW}" install krew
+    )
+
+Después añadir a `~/.bashrc` o `~/.zshrc`:
+
+    export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+Verificar: `kubectl krew version`
 
 Plugins que merece la pena instalar:
 
@@ -86,13 +106,26 @@ Ejemplo:
 
 Si instalas `fzf`, kubectx/kubens pasan a ser interactivos con búsqueda fuzzy.
 
-    brew install fzf
+| Sistema | Comando |
+|---------|---------|
+| macOS | `brew install fzf` |
+| Linux (Ubuntu/Debian) | `sudo apt install fzf` |
+| Linux (cualquier distro) | `git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && ~/.fzf/install` |
+
+> El método `git clone` configura automáticamente la integración con el shell (CTRL-R, CTRL-T). El paquete `apt` puede traer una versión más antigua.
+
+Verificar: `fzf --version`
 
 ### k9s
 
 TUI para Kubernetes. Como un `htop` para tu clúster.
 
-    brew install derailed/k9s/k9s
+| Sistema | Comando |
+|---------|---------|
+| macOS | `brew install derailed/k9s/k9s` |
+| Linux (Ubuntu/Debian) | `wget https://github.com/derailed/k9s/releases/latest/download/k9s_linux_amd64.deb && sudo apt install ./k9s_linux_amd64.deb && rm k9s_linux_amd64.deb` |
+
+> Para ARM64 sustituir `amd64` por `arm64` en el nombre del `.deb`.
 
     k9s                       # abre en el contexto actual
     k9s -n kube-system        # abre en un namespace
