@@ -12,6 +12,10 @@ Necesario para Kind. Sin Docker no hay clúster local.
 | Linux (Ubuntu) | `sudo apt-get install docker-ce docker-ce-cli containerd.io` |
 | Windows | [Docker Desktop](https://www.docker.com/products/docker-desktop/) |
 
+> **Windows:** Después de instalar Docker Desktop, activar la integración con WSL 2:
+> Settings → Resources → WSL Integration → Activar para tu distribución (Ubuntu).
+> Sin esto, `docker` no estará disponible dentro de WSL.
+
 Verificar: `docker info` y `docker version`
 
 ### Kind
