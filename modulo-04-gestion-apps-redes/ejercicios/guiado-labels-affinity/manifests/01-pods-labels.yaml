@@ -1,0 +1,77 @@
+# Pods con diferentes labels y annotations para practicar filtrado
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-prod
+  labels:
+    app: web
+    env: production
+    team: frontend
+  annotations:
+    description: "Servidor web principal de producción"
+    contact: "equipo-frontend@empresa.com"
+    release-date: "2024-03-15"
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.25-alpine
+      ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-staging
+  labels:
+    app: web
+    env: staging
+    team: frontend
+  annotations:
+    description: "Servidor web de staging para pruebas"
+    contact: "equipo-frontend@empresa.com"
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.25-alpine
+      ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: api-prod
+  labels:
+    app: api
+    env: production
+    team: backend
+  annotations:
+    description: "API REST de producción"
+    contact: "equipo-backend@empresa.com"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+spec:
+  containers:
+    - name: api
+      image: hashicorp/http-echo:0.2.3
+      args: ["-text=API Production"]
+      ports:
+        - containerPort: 5678
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: api-dev
+  labels:
+    app: api
+    env: development
+    team: backend
+  annotations:
+    description: "API REST de desarrollo"
+spec:
+  containers:
+    - name: api
+      image: hashicorp/http-echo:0.2.3
+      args: ["-text=API Development"]
+      ports:
+        - containerPort: 5678

@@ -1,0 +1,31 @@
+# Deployment con 4 réplicas que prefieren la zona eu-west-1a
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zoned-app
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: zoned-app
+  template:
+    metadata:
+      labels:
+        app: zoned-app
+        tier: frontend
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 70
+              preference:
+                matchExpressions:
+                  - key: zone
+                    operator: In
+                    values:
+                      - eu-west-1a
+      containers:
+        - name: web
+          image: nginx:1.25-alpine
+          ports:
+            - containerPort: 80

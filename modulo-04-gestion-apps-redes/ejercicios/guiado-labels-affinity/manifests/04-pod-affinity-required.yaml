@@ -1,0 +1,24 @@
+# NodeAffinity obligatoria: SOLO se ejecuta en nodos con disk=ssd
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-ssd-required
+  labels:
+    app: database
+    tier: storage
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: disk
+                operator: In
+                values:
+                  - ssd
+  containers:
+    - name: app
+      image: hashicorp/http-echo:0.2.3
+      args: ["-text=Estoy en un nodo SSD (obligatorio)"]
+      ports:
+        - containerPort: 5678

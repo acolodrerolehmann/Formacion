@@ -1,0 +1,34 @@
+# Combina affinity obligatoria + preferente
+# DEBE estar en nodo con disk=ssd
+# PREFIERE estar en zona eu-west-1a
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-combo
+  labels:
+    app: critical-db
+    tier: data
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: disk
+                operator: In
+                values:
+                  - ssd
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 90
+          preference:
+            matchExpressions:
+              - key: zone
+                operator: In
+                values:
+                  - eu-west-1a
+  containers:
+    - name: app
+      image: hashicorp/http-echo:0.2.3
+      args: ["-text=Nodo SSD obligatorio + zona eu-west-1a preferida"]
+      ports:
+        - containerPort: 5678

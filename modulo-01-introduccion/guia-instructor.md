@@ -146,6 +146,182 @@ Equivalente al Swarm Manager, pero más componentes especializados:
 
 ---
 
+## 4b. Metadatos de Objetos: Labels, Annotations y Scheduling
+
+### Labels (Etiquetas)
+
+Las **labels** son pares clave-valor que se asignan a cualquier objeto de Kubernetes. Son el mecanismo fundamental para **organizar, seleccionar y agrupar** recursos.
+
+```yaml
+metadata:
+  labels:
+    app: frontend
+    env: production
+    team: payments
+    version: v2.1.0
+```
+
+**¿Para qué sirven?**
+
+| Uso | Ejemplo |
+|-----|---------|
+| **Selección** | Un Service encuentra sus pods por labels (`selector: app=frontend`) |
+| **Agrupación** | Filtrar pods por entorno: `kubectl get pods -l env=production` |
+| **Scheduling** | NodeAffinity usa labels de nodos para decidir dónde ejecutar pods |
+| **Organización** | Etiquetar por equipo, proyecto, versión, capa (frontend/backend) |
+
+**Convenciones recomendadas:**
+
+| Label | Descripción |
+|-------|-------------|
+| `app.kubernetes.io/name` | Nombre de la aplicación |
+| `app.kubernetes.io/version` | Versión |
+| `app.kubernetes.io/component` | Componente (frontend, backend, db) |
+| `app.kubernetes.io/part-of` | Proyecto/sistema al que pertenece |
+| `app.kubernetes.io/managed-by` | Herramienta que lo gestiona (helm, kubectl) |
+
+**Selectors — el poder de las labels:**
+
+Los selectores permiten a otros objetos "encontrar" recursos por sus labels:
+
+```yaml
+# Un Service selecciona pods con estas labels
+spec:
+  selector:
+    app: frontend
+    env: production
+```
+
+```bash
+# Desde CLI
+kubectl get pods -l app=frontend
+kubectl get pods -l 'env in (production, staging)'
+kubectl get pods -l app=frontend,version!=v1.0
+kubectl delete pods -l env=test    # ¡Cuidado! Borra todos los pods de test
+```
+
+> **Equivalencia Swarm:** En Swarm podéis filtrar nodos con `--constraint node.labels.zone==eu-west`. En K8s las labels son universales: se usan en pods, nodos, services, namespaces, y cualquier otro objeto.
+
+### Annotations (Anotaciones)
+
+Las **annotations** también son pares clave-valor, pero su propósito es diferente: almacenan **metadatos informativos** que NO se usan para selección.
+
+```yaml
+metadata:
+  annotations:
+    description: "API de pagos para marketplace"
+    contact: "team-payments@empresa.com"
+    git-commit: "a1b2c3d"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+```
+
+**Labels vs Annotations:**
+
+| Aspecto | Labels | Annotations |
+|---------|--------|-------------|
+| **Propósito** | Identificar y seleccionar | Informar y configurar |
+| **Se pueden usar en selectors** | ✅ Sí | ❌ No |
+| **Tamaño** | Limitado (63 chars valor) | Hasta 256KB |
+| **Ejemplo** | `app: nginx` | `description: "Web server para..."` |
+| **Quién las usa** | K8s internamente (Services, Deployments) | Herramientas externas (Prometheus, Ingress, CI/CD) |
+
+> **Regla simple:** Si necesitas filtrar o seleccionar por ese dato → **label**. Si es información descriptiva o configuración para herramientas → **annotation**.
+
+### NodeSelector y NodeAffinity (Scheduling avanzado)
+
+Por defecto, el scheduler de K8s decide dónde ejecutar cada pod basándose en recursos disponibles. Pero a veces necesitas **control explícito**: ejecutar ciertos pods solo en nodos con GPU, en una zona geográfica concreta, o en nodos con SSD.
+
+#### Labels en Nodos
+
+Los nodos también tienen labels. Algunos vienen predefinidos:
+
+```bash
+kubectl get nodes --show-labels
+
+# Labels automáticas:
+# kubernetes.io/hostname=worker-1
+# kubernetes.io/os=linux
+# kubernetes.io/arch=amd64
+# topology.kubernetes.io/zone=eu-west-1a
+
+# Labels personalizadas:
+kubectl label nodes worker-1 disk=ssd
+kubectl label nodes worker-2 disk=hdd
+kubectl label nodes worker-1 gpu=nvidia
+```
+
+#### nodeSelector (simple)
+
+La forma más sencilla de restringir dónde corre un pod:
+
+```yaml
+spec:
+  nodeSelector:
+    disk: ssd        # Solo en nodos con label disk=ssd
+```
+
+Es un AND estricto: si ningún nodo cumple, el pod queda en **Pending** indefinidamente.
+
+#### nodeAffinity (avanzado)
+
+Más flexible que `nodeSelector`. Permite expresiones complejas y distingue entre **obligatorio** y **preferente**:
+
+```yaml
+spec:
+  affinity:
+    nodeAffinity:
+      # OBLIGATORIO: el pod NO se ejecuta si no se cumple
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: disk
+            operator: In
+            values: ["ssd"]
+      # PREFERENTE: el scheduler lo intenta, pero no es bloqueante
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 80
+        preference:
+          matchExpressions:
+          - key: topology.kubernetes.io/zone
+            operator: In
+            values: ["eu-west-1a"]
+```
+
+**Operadores disponibles:**
+
+| Operador | Significado |
+|----------|-------------|
+| `In` | El valor de la label está en la lista |
+| `NotIn` | El valor NO está en la lista |
+| `Exists` | La label existe (sin importar el valor) |
+| `DoesNotExist` | La label NO existe |
+| `Gt` / `Lt` | Mayor / Menor que (para valores numéricos) |
+
+**Tipos de affinity:**
+
+| Tipo | Comportamiento |
+|------|---------------|
+| `requiredDuringSchedulingIgnoredDuringExecution` | **Obligatorio.** Si no hay nodo que cumpla → pod Pending |
+| `preferredDuringSchedulingIgnoredDuringExecution` | **Preferente.** Si no hay nodo ideal, se coloca donde pueda |
+
+> **"IgnoredDuringExecution"** significa que si un nodo pierde la label después de que el pod ya esté corriendo, el pod NO se mueve. Solo afecta al scheduling inicial.
+
+#### Resumen Scheduling
+
+| Mecanismo | Complejidad | Uso |
+|-----------|-------------|-----|
+| Sin especificar | — | El scheduler decide (por recursos) |
+| `nodeSelector` | Baja | Restricción simple por una label |
+| `nodeAffinity` (required) | Media | Restricción obligatoria con operadores |
+| `nodeAffinity` (preferred) | Media | Preferencia con pesos (soft constraint) |
+| Taints + Tolerations | Alta | "Repeler" pods de ciertos nodos |
+
+> **Caso real:** "Los pods de base de datos deben correr en nodos con disco SSD (`required`). Los pods del frontend preferiblemente en la zona eu-west-1a (`preferred`, weight 80), pero si no hay capacidad pueden ir a otra zona."
+
+---
+
 ## 5. Despliegues
 
 En Swarm tenéis `docker service create` para desplegar contenedores con réplicas. En K8s existen **tres controladores** según el tipo de carga de trabajo:
