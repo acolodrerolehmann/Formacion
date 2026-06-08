@@ -318,6 +318,39 @@ spec:
 | `nodeAffinity` (preferred) | Media | Preferencia con pesos (soft constraint) |
 | Taints + Tolerations | Alta | "Repeler" pods de ciertos nodos |
 
+#### Taints y Tolerations (detallado)
+
+Los *taints* permiten "repeler" pods de nodos; las *tolerations* permiten que un pod sea programado en nodos con ciertos taints.
+
+Ejemplo: aplicar un taint a un nodo (desde la máquina del instructor):
+
+```bash
+kubectl taint nodes worker-1 dedicated=db:NoSchedule
+```
+
+Efectos principales:
+- `NoSchedule`: el scheduler no programará pods sin la toleration correspondiente.
+- `PreferNoSchedule`: el scheduler evitará el nodo cuando sea posible.
+- `NoExecute`: además de evitar, expulsará pods que no toleren el taint.
+
+Ejemplo de toleration en un Pod:
+
+```yaml
+spec:
+  tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "db"
+    effect: "NoSchedule"
+```
+
+Ejemplos prácticos y manifiestos
+- Consulta `modulo-01-introduccion/ejemplos/` para manifests listos: `node-selector.yaml`, `node-affinity-required.yaml`, `node-affinity-preferred.yaml`, `taint-toleration.yaml`, `daemonset-tolerations.yaml`.
+- Pasos sugeridos para practicar:
+  1. Etiquetar nodos: `kubectl label nodes <node> disk=ssd`
+  2. Aplicar taint: `kubectl taint nodes <node> dedicated=db:NoSchedule`
+  3. Desplegar `taint-toleration.yaml` y observar `kubectl get pods -o wide` y `kubectl describe pod <pod>` para diagnosticar scheduling.
+
 > **Caso real:** "Los pods de base de datos deben correr en nodos con disco SSD (`required`). Los pods del frontend preferiblemente en la zona eu-west-1a (`preferred`, weight 80), pero si no hay capacidad pueden ir a otra zona."
 
 ---

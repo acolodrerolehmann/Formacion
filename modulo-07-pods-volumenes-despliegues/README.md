@@ -42,6 +42,22 @@ Controlador que gestiona réplicas de pods stateless. Proporciona:
 
 Ideal para aplicaciones sin estado (APIs, servidores web).
 
+### ReplicaSet
+
+Un ReplicaSet asegura que un número determinado de réplicas de un pod esté activo en todo momento. Normalmente se crea y gestiona a través de un Deployment, pero a veces interesa crear o inspeccionar un ReplicaSet directamente para entender su comportamiento.
+
+Ejemplo: `ejercicios/guiado/manifests/replicaset-example.yaml`
+
+Comandos útiles:
+
+```bash
+kubectl get rs
+kubectl describe rs nginx-replicaset
+kubectl scale rs/nginx-replicaset --replicas=5
+```
+
+Cuando escalas o actualizas un Deployment, el Deployment gestiona el ReplicaSet subyacente (creándolo/actualizándolo/rotándolo).
+
 ### StatefulSets
 
 Para aplicaciones que requieren estado persistente, identidad estable y almacenamiento único por pod.
