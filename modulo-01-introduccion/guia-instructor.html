@@ -689,61 +689,103 @@
     <div class="slide" data-slide="6"><div class="slide-inner"><div class="section" id="sec5">
         <h2>5. Despliegues</h2>
 
-        <p>En Swarm tenéis <code>docker service create</code> para desplegar contenedores con réplicas. En K8s existen <strong>tres controladores</strong> según el tipo de carga de trabajo:</p>
+        <p>En Swarm tenéis <code>docker service create</code> para desplegar contenedores con réplicas. En Kubernetes existen varios controladores (ReplicaSet, Deployment, StatefulSet, DaemonSet, Job/CronJob) diseñados para distintos patrones de ejecución. Primero definimos el elemento básico: el <strong>ReplicaSet</strong>.</p>
 
-        <h3>Deployments (Stateless)</h3>
+        <h3>ReplicaSet (unidad básica de replicación)</h3>
 
-        <p>El equivalente directo a un <strong>Service de Swarm</strong>. Gestiona réplicas de pods sin estado.</p>
+        <p>Un <em>ReplicaSet</em> asegura que haya un número deseado de réplicas de un Pod corriendo en todo momento. Sus puntos clave:</p>
+        <ul>
+            <li>Mantiene <code>spec.replicas</code> pods que coinciden con su <code>selector</code> (labels).</li>
+            <li>Si un pod muere, el ReplicaSet crea otro usando la plantilla de pod en <code>spec.template</code>.</li>
+            <li>Si es creado por un Deployment, el ReplicaSet tendrá una <code>ownerReference</code> apuntando al Deployment que lo controla.</li>
+        </ul>
 
-        <table>
-            <thead><tr><th>Capacidad</th><th>Swarm</th><th>Kubernetes Deployment</th></tr></thead>
-            <tbody>
-                <tr><td><strong>Réplicas</strong></td><td><code>--replicas 3</code></td><td><code>replicas: 3</code> en el manifiesto</td></tr>
-                <tr><td><strong>Actualización gradual</strong></td><td><code>--update-delay 10s</code></td><td><code>strategy: RollingUpdate</code> (configurable)</td></tr>
-                <tr><td><strong>Rollback</strong></td><td><code>docker service rollback</code></td><td><code>kubectl rollout undo</code> (historial completo)</td></tr>
-                <tr><td><strong>Auto-scaling</strong></td><td>❌ Manual</td><td>✅ HPA (CPU/memoria/métricas custom)</td></tr>
-            </tbody>
-        </table>
+        <p>Ejemplo mínimo de ReplicaSet:</p>
+        <pre><code>apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-rs
+  template:
+    metadata:
+      labels:
+        app: nginx-rs
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.21-alpine
+</code></pre>
 
-        <h3>DaemonSets (Un pod por nodo)</h3>
+        <p>Comandos útiles:</p>
+        <pre><code>kubectl get rs
+kubectl describe rs nginx-rs
+kubectl get pods -l app=nginx-rs -o wide
+</code></pre>
 
-        <p>Garantiza que <strong>un pod corra en cada nodo</strong> del clúster. Cuando se añade un nodo, el DaemonSet despliega automáticamente el pod en él.</p>
+        <p><strong>Nota:</strong> normalmente se trabaja con <em>Deployments</em> en lugar de gestionar ReplicaSets manualmente. <strong>StatefulSet</strong> no usa ReplicaSets; tiene su propio controlador y reglas específicas.</p>
 
-        <table>
-            <thead><tr><th>Caso de uso</th><th>Ejemplo</th></tr></thead>
-            <tbody>
-                <tr><td><strong>Logging</strong></td><td>Fluentd/Filebeat recolectando logs en cada nodo</td></tr>
-                <tr><td><strong>Monitoreo</strong></td><td>Node Exporter (Prometheus) en todos los nodos</td></tr>
-                <tr><td><strong>Networking</strong></td><td>Agentes de CNI, mesh sidecars</td></tr>
-            </tbody>
-        </table>
+        <h3>Deployments (controlador para aplicaciones sin estado)</h3>
 
-        <blockquote>
-            <strong>Equivalente Swarm:</strong> <code>docker service create --mode global</code> → ejecuta una tarea en cada nodo. El DaemonSet es el mismo concepto pero con más control (tolerations, node selectors).
-        </blockquote>
+        <p>Un <em>Deployment</em> es la abstracción más usada para aplicaciones stateless. Internamente crea y gestiona ReplicaSets para soportar actualizaciones seguras, historial y rollbacks.</p>
 
-        <h3>StatefulSets (Con estado)</h3>
+        <p>Puntos clave:</p>
+        <ul>
+            <li><strong>Actualizaciones</strong>: con <code>strategy: RollingUpdate</code> Kubernetes crea un nuevo ReplicaSet con la nueva plantilla y va escalándolo mientras reduce el anterior (<code>maxSurge</code> / <code>maxUnavailable</code>).</li>
+            <li><strong>Historial</strong>: mantiene revisiones para permitir <code>kubectl rollout undo</code>.</li>
+            <li><strong>Escalado</strong>: cambiar <code>spec.replicas</code> o usar HPA para autoescalado.</li>
+            <li><strong>Ownership</strong>: el Deployment es el dueño de los ReplicaSets que crea.</li>
+        </ul>
 
-        <p>Para aplicaciones que necesitan <strong>identidad estable</strong> y <strong>almacenamiento persistente por pod</strong>. A diferencia de un Deployment, los pods no son intercambiables.</p>
+        <p>Ejemplo de estrategia RollingUpdate:</p>
+        <pre><code>strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 1
+</code></pre>
 
-        <table>
-            <thead><tr><th>Deployment</th><th>StatefulSet</th></tr></thead>
-            <tbody>
-                <tr><td>Pods con nombres aleatorios (deploy-7f8b4-xk2p)</td><td>Pods con nombres ordenados (mysql-0, mysql-1, mysql-2)</td></tr>
-                <tr><td>Sin almacenamiento por pod</td><td>Cada pod tiene su propio PVC</td></tr>
-                <tr><td>Se pueden escalar en cualquier orden</td><td>Escalado/actualización secuencial</td></tr>
-                <tr><td>Ideal: APIs, web servers</td><td>Ideal: bases de datos, colas, caches</td></tr>
-            </tbody>
-        </table>
+        <p>Comandos útiles:</p>
+        <pre><code>kubectl apply -f my-deployment.yaml
+kubectl rollout status deployment/my-deployment
+kubectl rollout history deployment/my-deployment
+kubectl rollout undo deployment/my-deployment
+</code></pre>
+
+        <h3>StatefulSets (aplicaciones con estado)</h3>
+
+        <p>StatefulSet está diseñado para aplicaciones que necesitan identidad y almacenamiento persistente por pod:</p>
+        <ul>
+            <li>Nombres estables: <code>&lt;name&gt;-&lt;ordinal&gt;</code> (ej. <code>db-0</code>).</li>
+            <li>Headless Service para resolver DNS por pod.</li>
+            <li><code>volumeClaimTemplates</code> para crear un PVC por pod, que persiste aunque el pod sea recreado.</li>
+            <li>Operaciones ordenadas (creación, scalado, actualización) por defecto <code>OrderedReady</code> — existe opción <code>Parallel</code> para paralelizar.</li>
+        </ul>
+
+        <p>No usa ReplicaSets: su controlador gestiona directamente los pods y los volúmenes asociados.</p>
+
+        <h3>DaemonSets (agentes por nodo)</h3>
+
+        <p>DaemonSet garantiza que se ejecute un pod en cada nodo (o en el subconjunto de nodos definidos por selectores). Uso típico: agentes de logging, exporters de monitorización, componentes CNI.</p>
+
+        <h3>Jobs y CronJobs (trabajos por lotes)</h3>
+
+        <p><strong>Job</strong>: ejecuta uno o varios pods hasta completar la tarea con éxito. <strong>CronJob</strong>: programa Jobs periódicos (cron-style).</p>
+        <p>Parámetros importantes: <code>completions</code>, <code>parallelism</code>, <code>backoffLimit</code>.</p>
 
         <h3>Resumen rápido</h3>
 
         <table>
-            <thead><tr><th>Controlador</th><th>¿Cuándo usarlo?</th></tr></thead>
+            <thead><tr><th>Controlador</th><th>¿Cuándo usarlo?</th><th>Nota</th></tr></thead>
             <tbody>
-                <tr><td><strong>Deployment</strong></td><td>Apps sin estado (APIs, frontends, workers)</td></tr>
-                <tr><td><strong>DaemonSet</strong></td><td>Agentes que deben correr en todos los nodos</td></tr>
-                <tr><td><strong>StatefulSet</strong></td><td>Apps con estado (BBDDs, clusters distribuidos)</td></tr>
+                <tr><td><strong>ReplicaSet</strong></td><td>Comprender réplica básica (rara vez usar directo)</td><td>Mantiene N pods con selector</td></tr>
+                <tr><td><strong>Deployment</strong></td><td>Apps sin estado</td><td>Rolling updates + historial + HPA</td></tr>
+                <tr><td><strong>StatefulSet</strong></td><td>Apps con estado</td><td>Identidad estable + PVC por pod</td></tr>
+                <tr><td><strong>DaemonSet</strong></td><td>Agentes por nodo</td><td>1 pod por nodo (o subset)</td></tr>
+                <tr><td><strong>Job / CronJob</strong></td><td>Batch y tareas programadas</td><td>Ejecutan hasta completarse / periódicas</td></tr>
             </tbody>
         </table>
     </div></div></div>
