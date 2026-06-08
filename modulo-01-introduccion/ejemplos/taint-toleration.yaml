@@ -1,0 +1,16 @@
+# Uso: desde el host instructor
+# kubectl taint nodes <node> dedicated=db:NoSchedule
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-toleration
+spec:
+  containers:
+  - name: nginx
+    image: nginx:alpine
+  tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "db"
+    effect: "NoSchedule"

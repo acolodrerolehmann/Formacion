@@ -189,6 +189,8 @@ kubectl label nodes labels-lab-worker2 zone=eu-west-1b
 
 ### Paso 2: Desplegar un Deployment con affinity
 
+> Nota: este ejercicio introduce Deployments — el controlador que gestiona réplicas de pods y actualizaciones declarativas. Por detrás, un Deployment crea y mantiene un ReplicaSet. La explicación detallada de ReplicaSet y estrategias de despliegue se encuentra en [Módulo 7 - Pods, Volúmenes y Despliegues](../../../modulo-07-pods-volumenes-despliegues/README.md).
+
 ```bash
 kubectl apply -f manifests/07-deployment-affinity.yaml
 ```
