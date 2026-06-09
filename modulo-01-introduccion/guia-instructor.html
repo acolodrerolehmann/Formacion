@@ -683,6 +683,56 @@
             <li>En K8s: 1 pod = 1+ contenedores que comparten red y almacenamiento</li>
             <li>Caso típico: <strong>sidecar patterns</strong> (proxy, logging, etc.)</li>
         </ul>
+
+        <h3>Secrets y ConfigMaps (configuración y secretos)</h3>
+        <p>Los <strong>ConfigMap</strong> almacenan datos no sensibles (pares clave/valor o archivos). Los <strong>Secret</strong> son para datos sensibles (base64-encoded).</p>
+
+        <p><strong>Ejemplo ConfigMap:</strong></p>
+        <pre><code>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  APP_ENV: production
+  LOG_LEVEL: info
+</code></pre>
+
+        <p>Uso como variable de entorno:</p>
+        <pre><code>env:
+- name: APP_ENV
+  valueFrom:
+    configMapKeyRef:
+      name: app-config
+      key: APP_ENV
+</code></pre>
+
+        <p><strong>Ejemplo Secret (Opaque):</strong></p>
+        <pre><code>apiVersion: v1
+kind: Secret
+metadata:
+  name: db-credentials
+type: Opaque
+data:
+  username: YWRtaW4=
+  password: czNjcjN0
+</code></pre>
+
+        <p>Crear desde CLI:</p>
+        <pre><code>kubectl create secret generic db-credentials \
+  --from-literal=username=admin \
+  --from-literal=password=s3cr3t
+</code></pre>
+
+        <p>Buenas prácticas: no poner secretos en repositorios, habilitar encryption-at-rest, usar SealedSecrets/Vault para producción.</p>
+
+        <h3>Otros objetos base: ServiceAccount y RBAC</h3>
+        <p><strong>ServiceAccount</strong>: identidad para pods. <strong>Roles</strong> y <strong>RoleBindings</strong> controlan permisos dentro de un namespace; <strong>ClusterRole</strong> y <strong>ClusterRoleBinding</strong> para ámbito cluster.</p>
+
+        <pre><code>apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app-sa
+</code></pre>
     </div></div></div>
 
     <!-- SECTION 5 -->

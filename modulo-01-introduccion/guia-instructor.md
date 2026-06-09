@@ -144,6 +144,118 @@ Equivalente al Swarm Manager, pero más componentes especializados:
 - En K8s: 1 pod = 1+ contenedores que comparten red y almacenamiento
 - Caso típico: sidecar patterns (proxy, logging, etc.)
 
+### Secrets y ConfigMaps (configuración y secretos)
+
+Los ConfigMap y Secret son objetos clave para separar configuración y credenciales del código/imagen.
+
+- ConfigMap: almacena datos no sensibles (pares clave/valor, archivos de configuración). Se monta como variables de entorno o como archivos mediante volumen.
+
+Ejemplo ConfigMap:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  APP_ENV: production
+  LOG_LEVEL: info
+```
+
+Uso como variable de entorno:
+
+```yaml
+env:
+- name: APP_ENV
+  valueFrom:
+    configMapKeyRef:
+      name: app-config
+      key: APP_ENV
+```
+
+Uso como volumen:
+
+```yaml
+volumes:
+- name: config
+  configMap:
+    name: app-config
+containers:
+- name: app
+  volumeMounts:
+  - name: config
+    mountPath: /etc/config
+```
+
+- Secret: almacena datos sensibles (base64-encoded). Base64 NO es encriptación: en producción habilita encryption-at-rest o usa SealedSecrets/ExternalSecrets.
+
+Crear secret (CLI):
+
+```
+kubectl create secret generic db-credentials --from-literal=username=admin --from-literal=password=s3cr3t
+```
+
+Ejemplo Secret (Opaque):
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-credentials
+type: Opaque
+data:
+  username: YWRtaW4=
+  password: czNjcjN0
+```
+
+Uso como variable de entorno:
+
+```yaml
+env:
+- name: DB_USER
+  valueFrom:
+    secretKeyRef:
+      name: db-credentials
+      key: username
+```
+
+Tipo TLS (ejemplo):
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tls-secret
+type: kubernetes.io/tls
+data:
+  tls.crt: <base64>
+  tls.key: <base64>
+```
+
+Buenas prácticas:
+- No almacenar secretos en repositorios ni imágenes.
+- Usar Secret para credenciales, ConfigMap para configuración no sensible.
+- Activar encryption-at-rest en etcd y usar RBAC.
+- Considerar soluciones externas (Vault, SealedSecrets, ExternalSecrets) para mayor seguridad.
+
+### Otros objetos base: ServiceAccount y RBAC
+
+- ServiceAccount: identidades para pods (tokens automáticos) utilizadas para autenticación hacia la API.
+
+Ejemplo de ServiceAccount:
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app-sa
+```
+
+- Roles / ClusterRoles y RoleBinding / ClusterRoleBinding: control de permisos (namespace vs cluster).
+
+Usar `kubectl auth can-i` para probar permisos de un ServiceAccount.
+
+
 ---
 
 ## 4b. Metadatos de Objetos: Labels, Annotations y Scheduling
