@@ -61,6 +61,18 @@ kubectl get secret api-credentials -n demo-config -o jsonpath='{.data.DB_PASSWOR
 
 > **Nota:** Base64 no es encriptación. Es solo codificación. La seguridad real viene de RBAC (quién puede leer Secrets) y encryption at-rest en etcd.
 
+#### Tipos de Secrets adicionales (práctica)
+
+- Secret TLS (para Ingress/HTTPS):
+  - Crear: `kubectl create secret tls tls-secret --cert=cert.crt --key=cert.key -n demo-config`
+  - Uso típico: referenciar `secretName` en recursos Ingress o en controllers que acepten TLS.
+
+- Secret Docker Registry (para Pulls privados):
+  - Crear: `kubectl create secret docker-registry regcred --docker-server=myregistry.example.com --docker-username=user --docker-password=pass --docker-email=me@example.com -n demo-config`
+  - Uso típico: añadir `imagePullSecrets` en un ServiceAccount o en un Pod spec.
+
+- Secret Opaque para basic auth / tokens: `kubectl create secret generic basic-auth --from-literal=auth="admin:secret" -n demo-config`
+
 ---
 
 ### Paso 5: Redesplegar usando ConfigMap y Secret (✅ BIEN)
@@ -70,6 +82,71 @@ kubectl apply -f manifests/04-deployment-refactored.yaml -n demo-config
 Este Deployment usa:
 - `envFrom.configMapRef` → inyecta todas las claves del ConfigMap como variables de entorno
 - `env.valueFrom.secretKeyRef` → inyecta claves individuales del Secret
+
+
+---
+
+### Paso 6: Usar TLS Secret con Ingress (opcional)
+
+1. Crear el TLS Secret:
+
+```
+kubectl create secret tls tls-secret --cert=cert.crt --key=cert.key -n demo-config
+```
+
+2. Crear un Ingress que use ese secret:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-ingress
+spec:
+  tls:
+  - hosts:
+    - demo.local
+    secretName: tls-secret
+  rules:
+  - host: demo.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api-service
+            port:
+              number: 80
+```
+
+---
+
+### Paso 7: Usar Secret docker-registry para pulls privados
+
+1. Crear secret docker-registry (ejemplo):
+
+```
+kubectl create secret docker-registry regcred --docker-server=myregistry.example.com --docker-username=user --docker-password=pass --docker-email=me@example.com -n demo-config
+```
+
+2. Usarlo en un Pod/ServiceAccount:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: private-pod
+spec:
+  containers:
+  - name: private
+    image: myregistry.example.com/myimage:latest
+  imagePullSecrets:
+  - name: regcred
+```
+
+3. Alternativa: asociarlo a un ServiceAccount para no repetir en cada Pod.
+
+---
 
 ---
 
