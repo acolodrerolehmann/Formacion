@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-nodeport
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-nodeport
+  template:
+    metadata:
+      labels:
+        app: hello-nodeport
+    spec:
+      containers:
+      - name: web
+        # TODO: especificar la imagen (ej: nginx:alpine)
+        image: TODO_IMAGE
+        ports:
+        - containerPort: 80
