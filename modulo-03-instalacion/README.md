@@ -57,6 +57,26 @@ Ideal para empezar: proporciona clúster funcional en minutos sin complicaciones
 
 Perfecta para integración continua y pruebas rápidas de configuraciones.
 
+Habilitar Ingress en Kind (opcional, aparte del parche):
+
+1. Crear un clúster Kind que exponga los puertos 80/443 (ejemplo incluido):
+   kind create cluster --config=modulo-03-instalacion/ejercicios/ejercicio-04/manifests/kind-cluster.yaml --name kind-testing
+
+2. Instalar el controlador Ingress (manifiesto incluido):
+   kubectl apply -f modulo-03-instalacion/ejercicios/ejercicio-04/manifests/ingress-controller.yaml
+
+3. Verificar que los pods del controlador estén en Running:
+   kubectl -n ingress-nginx get pods
+
+4. Aplicar el Ingress de la aplicación (ejemplo):
+   kubectl apply -f modulo-03-instalacion/ejercicios/ejercicio-04/manifests/headlamp-ingress.yaml
+   (Asegúrate de que el Service/Deployment de la app esté desplegado antes)
+
+5. Acceso local:
+   Si el clúster tiene mapeo de host ports (como el ejemplo), la app será accesible en http://localhost/ o en el host definido en el Ingress. En sistemas que requieren permisos para bindear 80/443, usa sudo o configura puertos alternativos.
+
+Nota: Este flujo utiliza el manifiesto ingress-controller.yaml incluido y es una alternativa al parche; úsalo si prefieres desplegar un controlador completo en el clúster Kind.
+
 ## Comandos útiles
 
 # Verificar estado del clúster
