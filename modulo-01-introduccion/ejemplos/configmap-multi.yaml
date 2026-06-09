@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: multi-config
+data:
+  app.properties: |
+    host=postgres
+    port=5432
+  feature_flags.json: |
+    {"newFeature": true}
+  EXTRA_SETTING: value123
