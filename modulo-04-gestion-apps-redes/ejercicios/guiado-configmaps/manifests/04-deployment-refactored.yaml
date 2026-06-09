@@ -6,7 +6,7 @@ metadata:
   labels:
     app: api-refactored
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: api-refactored
@@ -35,3 +35,4 @@ spec:
             secretKeyRef:
               name: api-credentials
               key: DB_PASSWORD
+

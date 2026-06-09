@@ -1,0 +1,13 @@
+# Alternativa para entornos sin LoadBalancer (Kind/Minikube): usar NodePort
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-loadbalancer-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: hello-loadbalancer
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30081

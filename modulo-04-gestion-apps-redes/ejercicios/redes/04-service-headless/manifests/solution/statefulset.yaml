@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: headless-app
+spec:
+  serviceName: headless-app
+  replicas: 2
+  selector:
+    matchLabels:
+      app: headless-app
+  template:
+    metadata:
+      labels:
+        app: headless-app
+    spec:
+      containers:
+      - name: web
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
