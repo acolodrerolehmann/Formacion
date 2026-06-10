@@ -26,3 +26,12 @@ kubectl apply -f manifests/
 kubectl get pv,pvc
 kubectl get deployments,pods
 kubectl describe pod <nombre-del-pod>
+
+
+# Nota, si no funciona el default the Kind, usar
+
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+
+# Make it the default
+kubectl patch storageclass local-path \
+  -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'kubectl exec -n kube-system ds/cilium -- hubble observe --namespace default

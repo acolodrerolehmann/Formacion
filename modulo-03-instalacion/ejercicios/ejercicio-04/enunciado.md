@@ -40,7 +40,7 @@ kubectl get nodes
 
 ### Tarea 2: Instalar el Ingress Controller NGINX
 
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+#kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
 > **Nota:** El controller debe ejecutarse en el control-plane (donde están los puertos 80/443 mapeados). Si se programa en un worker, parchea:
 > kubectl -n ingress-nginx patch deployment ingress-nginx-controller \

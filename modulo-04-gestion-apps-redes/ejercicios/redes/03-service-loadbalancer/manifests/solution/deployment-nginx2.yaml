@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-loadbalancer
+  name: loadbalancer
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: hello-loadbalancer
+      app: loadbalancer
   template:
     metadata:
       labels:
-        app: hello-loadbalancer
+        app: loadbalancer
     spec:
       containers:
       - name: web
