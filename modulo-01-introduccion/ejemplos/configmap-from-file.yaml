@@ -1,0 +1,12 @@
+# Crea un ConfigMap a partir de un fichero (ej. nginx.conf)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  # Contenido de nginx.conf inline (ejemplo corto)
+  nginx.conf: |
+    server {
+      listen 80;
+      location / { root /usr/share/nginx/html; }
+    }

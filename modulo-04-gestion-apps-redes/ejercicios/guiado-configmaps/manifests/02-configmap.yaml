@@ -6,3 +6,4 @@ data:
   DB_HOST: "postgres.prod.svc"
   DB_PORT: "5432"
   LOG_LEVEL: "info"
+  DB_TIMEOUT: "30s"

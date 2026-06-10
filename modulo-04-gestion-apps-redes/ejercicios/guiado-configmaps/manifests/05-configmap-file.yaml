@@ -5,18 +5,12 @@ metadata:
 data:
   default.conf: |
     server {
-        listen 80;
+        listen 8888;
         server_name localhost;
 
         location / {
             root /usr/share/nginx/html;
             index index.html;
-        }
-
-        location /api {
-            proxy_pass http://api-refactored:8080;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
         }
 
         location /health {

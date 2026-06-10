@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadbalancer-clusterip  
+spec:
+  selector:
+    app: hello-loadbalancer
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80

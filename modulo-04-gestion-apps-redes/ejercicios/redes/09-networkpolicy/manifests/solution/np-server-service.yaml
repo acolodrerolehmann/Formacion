@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: np-server
+spec:
+  selector:
+    app: np-server
+  ports:
+  - port: 80
+    targetPort: 80

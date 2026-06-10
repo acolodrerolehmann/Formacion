@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hello-tls
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - secure.local
+    secretName: tls-secret
+  rules:
+  - host: secure.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: hello-clusterip
+            port:
+              number: 80

@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-headless
+  labels:
+    app: web
+spec:
+  ports:
+  - port: 80
+    name: http
+  clusterIP: None
+  selector:
+    app: web
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web-stateful
+spec:
+  serviceName: "web-headless"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.21-alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi

@@ -4,7 +4,12 @@ metadata:
   name: headlamp
   namespace: headlamp
 spec:
-  replicas: 1
+  replicas: 4
+  strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 50%
+          maxSurge: 50%
   selector:
     matchLabels:
       app: headlamp
@@ -14,9 +19,10 @@ spec:
         app: headlamp
     spec:
       serviceAccountName: headlamp-admin
+     
       containers:
         - name: headlamp
-          image: ghcr.io/headlamp-k8s/headlamp:v0.25.0
+          image: ghcr.io/headlamp-k8s/headlamp:v0.40.0
           args:
             - "-in-cluster"
             - "-plugins-dir=/headlamp/plugins"

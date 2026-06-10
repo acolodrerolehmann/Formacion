@@ -144,6 +144,118 @@ Equivalente al Swarm Manager, pero más componentes especializados:
 - En K8s: 1 pod = 1+ contenedores que comparten red y almacenamiento
 - Caso típico: sidecar patterns (proxy, logging, etc.)
 
+### Secrets y ConfigMaps (configuración y secretos)
+
+Los ConfigMap y Secret son objetos clave para separar configuración y credenciales del código/imagen.
+
+- ConfigMap: almacena datos no sensibles (pares clave/valor, archivos de configuración). Se monta como variables de entorno o como archivos mediante volumen.
+
+Ejemplo ConfigMap:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  APP_ENV: production
+  LOG_LEVEL: info
+```
+
+Uso como variable de entorno:
+
+```yaml
+env:
+- name: APP_ENV
+  valueFrom:
+    configMapKeyRef:
+      name: app-config
+      key: APP_ENV
+```
+
+Uso como volumen:
+
+```yaml
+volumes:
+- name: config
+  configMap:
+    name: app-config
+containers:
+- name: app
+  volumeMounts:
+  - name: config
+    mountPath: /etc/config
+```
+
+- Secret: almacena datos sensibles (base64-encoded). Base64 NO es encriptación: en producción habilita encryption-at-rest o usa SealedSecrets/ExternalSecrets.
+
+Crear secret (CLI):
+
+```
+kubectl create secret generic db-credentials --from-literal=username=admin --from-literal=password=s3cr3t
+```
+
+Ejemplo Secret (Opaque):
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-credentials
+type: Opaque
+data:
+  username: YWRtaW4=
+  password: czNjcjN0
+```
+
+Uso como variable de entorno:
+
+```yaml
+env:
+- name: DB_USER
+  valueFrom:
+    secretKeyRef:
+      name: db-credentials
+      key: username
+```
+
+Tipo TLS (ejemplo):
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tls-secret
+type: kubernetes.io/tls
+data:
+  tls.crt: <base64>
+  tls.key: <base64>
+```
+
+Buenas prácticas:
+- No almacenar secretos en repositorios ni imágenes.
+- Usar Secret para credenciales, ConfigMap para configuración no sensible.
+- Activar encryption-at-rest en etcd y usar RBAC.
+- Considerar soluciones externas (Vault, SealedSecrets, ExternalSecrets) para mayor seguridad.
+
+### Otros objetos base: ServiceAccount y RBAC
+
+- ServiceAccount: identidades para pods (tokens automáticos) utilizadas para autenticación hacia la API.
+
+Ejemplo de ServiceAccount:
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app-sa
+```
+
+- Roles / ClusterRoles y RoleBinding / ClusterRoleBinding: control de permisos (namespace vs cluster).
+
+Usar `kubectl auth can-i` para probar permisos de un ServiceAccount.
+
+
 ---
 
 ## 4b. Metadatos de Objetos: Labels, Annotations y Scheduling
@@ -318,55 +430,171 @@ spec:
 | `nodeAffinity` (preferred) | Media | Preferencia con pesos (soft constraint) |
 | Taints + Tolerations | Alta | "Repeler" pods de ciertos nodos |
 
+#### Taints y Tolerations (detallado)
+
+Los *taints* permiten "repeler" pods de nodos; las *tolerations* permiten que un pod sea programado en nodos con ciertos taints.
+
+Ejemplo: aplicar un taint a un nodo (desde la máquina del instructor):
+
+```bash
+kubectl taint nodes worker-1 dedicated=db:NoSchedule
+```
+
+Efectos principales:
+- `NoSchedule`: el scheduler no programará pods sin la toleration correspondiente.
+- `PreferNoSchedule`: el scheduler evitará el nodo cuando sea posible.
+- `NoExecute`: además de evitar, expulsará pods que no toleren el taint.
+
+Ejemplo de toleration en un Pod:
+
+```yaml
+spec:
+  tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "db"
+    effect: "NoSchedule"
+```
+
+Ejemplos prácticos y manifiestos
+- Consulta `modulo-01-introduccion/ejemplos/` para manifests listos: `node-selector.yaml`, `node-affinity-required.yaml`, `node-affinity-preferred.yaml`, `taint-toleration.yaml`, `daemonset-tolerations.yaml`.
+- Pasos sugeridos para practicar:
+  1. Etiquetar nodos: `kubectl label nodes <node> disk=ssd`
+  2. Aplicar taint: `kubectl taint nodes <node> dedicated=db:NoSchedule`
+  3. Desplegar `taint-toleration.yaml` y observar `kubectl get pods -o wide` y `kubectl describe pod <pod>` para diagnosticar scheduling.
+
 > **Caso real:** "Los pods de base de datos deben correr en nodos con disco SSD (`required`). Los pods del frontend preferiblemente en la zona eu-west-1a (`preferred`, weight 80), pero si no hay capacidad pueden ir a otra zona."
 
 ---
 
 ## 5. Despliegues
 
-En Swarm tenéis `docker service create` para desplegar contenedores con réplicas. En K8s existen **tres controladores** según el tipo de carga de trabajo:
+En Swarm tenéis `docker service create` para desplegar contenedores con réplicas. En Kubernetes existen varios controladores que gestionan diferentes patrones de despliegue según las necesidades de la carga de trabajo. Antes de ver los controladores, definamos el elemento básico: el ReplicaSet.
 
-### Deployments (Stateless)
+### ReplicaSet (unidad básica de replicación)
 
-El equivalente directo a un **Service de Swarm**. Gestiona réplicas de pods sin estado.
+Un ReplicaSet (RS) es el controlador que asegura que exista un número deseado de réplicas de un Pod en todo momento. Sus características principales:
 
-| Capacidad | Swarm | Kubernetes Deployment |
-|-----------|-------|-----------------------|
-| Réplicas | `--replicas 3` | `replicas: 3` en el manifiesto |
-| Actualización gradual | `--update-delay 10s` | `strategy: RollingUpdate` (configurable) |
-| Rollback | `docker service rollback` | `kubectl rollout undo` (historial completo) |
-| Auto-scaling | ❌ Manual | ✅ HPA (CPU/memoria/métricas custom) |
+- Mantiene `spec.replicas` pods que coinciden con su `selector` (labels).
+- Si un pod muere, el ReplicaSet crea otro con la plantilla de pod definida en `spec.template`.
+- Si el ReplicaSet fue creado por un Deployment, normalmente tendrá una `ownerReference` apuntando al Deployment.
 
-### DaemonSets (Un pod por nodo)
+Ejemplo mínimo de ReplicaSet:
 
-Garantiza que **un pod corra en cada nodo** del clúster. Cuando se añade un nodo, el DaemonSet despliega automáticamente el pod en él.
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-rs
+  template:
+    metadata:
+      labels:
+        app: nginx-rs
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.21-alpine
+```
 
-| Caso de uso | Ejemplo |
-|-------------|---------|
-| Logging | Fluentd/Filebeat recolectando logs en cada nodo |
-| Monitoreo | Node Exporter (Prometheus) en todos los nodos |
-| Networking | Agentes de CNI, mesh sidecars |
+Comandos útiles:
 
-> **Equivalente Swarm:** `docker service create --mode global` → ejecuta una tarea en cada nodo. El DaemonSet es el mismo concepto pero con más control (tolerations, node selectors).
+```bash
+kubectl get rs
+kubectl describe rs nginx-rs
+kubectl get pods -l app=nginx-rs -o wide
+```
 
-### StatefulSets (Con estado)
+Nota importante: normalmente no se trabaja con ReplicaSets directamente en entornos productivos; se usan Deployments para manejar la creación/actualización de ReplicaSets (historial, rollbacks, estrategias de update). StatefulSet, en cambio, NO utiliza ReplicaSets: tiene su propio controlador con reglas distintas (identidad y volúmenes estables).
 
-Para aplicaciones que necesitan **identidad estable** y **almacenamiento persistente por pod**. A diferencia de un Deployment, los pods no son intercambiables.
+---
 
-| Deployment | StatefulSet |
-|------------|-------------|
-| Pods con nombres aleatorios (deploy-7f8b4-xk2p) | Pods con nombres ordenados (mysql-0, mysql-1, mysql-2) |
-| Sin almacenamiento por pod | Cada pod tiene su propio PVC |
-| Se pueden escalar en cualquier orden | Escalado/actualización secuencial |
-| Ideal: APIs, web servers | Ideal: bases de datos, colas, caches |
+### Deployments (controlador para aplicaciones sin estado)
 
-### Resumen rápido
+Un Deployment es el recurso de más alto nivel para gestionar aplicaciones stateless. Internamente crea y gestiona ReplicaSets para realizar actualizaciones seguras y mantener la cantidad deseada de réplicas.
 
-| Controlador | ¿Cuándo usarlo? |
-|-------------|-----------------|
-| **Deployment** | Apps sin estado (APIs, frontends, workers) |
-| **DaemonSet** | Agentes que deben correr en todos los nodos |
-| **StatefulSet** | Apps con estado (BBDDs, clusters distribuidos) |
+Puntos clave:
+
+- Actualizaciones: `strategy: RollingUpdate` (por defecto) crea un nuevo ReplicaSet con la nueva plantilla y escala progresivamente (parámetros `maxSurge` / `maxUnavailable`).
+- Historial: Kubernetes guarda revisions (ReplicaSets anteriores) y permite rollback (`kubectl rollout undo deployment/<name>`).
+- Escalado: modificar `spec.replicas` o usar HPA para escalar automáticamente.
+- OwnerReferences: el Deployment es el dueño del ReplicaSet creado; al eliminar un Deployment, por defecto se mantienen los ReplicaSets si se elimina con `--cascade=false`.
+
+Ejemplo de opciones de RollingUpdate:
+
+```yaml
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 1
+```
+
+Comandos útiles:
+
+```bash
+kubectl apply -f my-deployment.yaml
+kubectl rollout status deployment/my-deployment
+kubectl rollout history deployment/my-deployment
+kubectl rollout undo deployment/my-deployment
+```
+
+Uso recomendado: servicios web, APIs, workers sin estado. Los Deployments ofrecen el mejor balance entre control y operativa para la mayoría de microservicios.
+
+---
+
+### StatefulSets (aplicaciones con estado)
+
+StatefulSet está pensado para workloads que requieren identidad estable y almacenamiento persistente por pod:
+
+- Cada Pod obtiene un nombre estable: `<statefulset-name>-<ordinal>` (ej. `db-0`, `db-1`).
+- Asociado a un Headless Service para resolver DNS por nombre de pod.
+- `volumeClaimTemplates` crea un PVC por pod (cada PVC se asocia al pod correspondiente y persiste aunque el pod se elimine).
+- Operaciones ordenadas: creación, escalado y actualización siguen un orden (por defecto `OrderedReady`).
+- No usa ReplicaSets: tiene su propia lógica de control.
+
+Conceptos útiles:
+- `podManagementPolicy`: `OrderedReady` (por defecto) o `Parallel`.
+- `updateStrategy`: `RollingUpdate` con `partition` para control fino de updates.
+
+Uso recomendado: bases de datos, clusters distribuidos, caches que requieren persistencia y orden.
+
+---
+
+### DaemonSets (agentes por nodo)
+
+DaemonSet garantiza que un Pod corra en *cada* nodo (o en los nodos que cumplan selectores). Se usan para:
+
+- Agentes de logging / observabilidad (Fluentd, Filebeat, Node Exporter).
+- Componentes de red y CNI que necesitan correr en todos los nodos.
+- Operaciones de mantenimiento que deben ejecutarse localmente.
+
+Diferencias clave: no se escala por réplicas; Kubernetes se encarga de crear/eliminar pods cuando los nodos entran o salen del clúster.
+
+---
+
+### Jobs y CronJobs (trabajos por lotes)
+
+- Job: ejecuta uno o varios Pods hasta completarse con éxito (útil para tareas puntuales: migraciones, backups, importaciones).
+- CronJob: programa Jobs periódicos (cron-style).
+
+Parámetros importantes: `completions`, `parallelism`, `backoffLimit`.
+
+---
+
+### ¿Qué usar y cuándo? (resumen)
+
+| Controlador | ¿Cuándo usarlo? | Característica principal |
+|-------------|-----------------|-------------------------|
+| ReplicaSet | Entender réplica básica (rara vez directo) | Mantiene N pods con selector |
+| Deployment | Aplicaciones sin estado | Rolling updates + historial + HPA |
+| StatefulSet | Aplicaciones con estado | Identidad estable + PVC por pod |
+| DaemonSet | Agentes por nodo | 1 pod por nodo (o subset) |
+| Job / CronJob | Trabajos batch | Ejecutar hasta completar / programado |
 
 ---
 

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-loadbalancer
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-loadbalancer
+  template:
+    metadata:
+      labels:
+        app: hello-loadbalancer
+    spec:
+      containers:
+      - name: web
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
