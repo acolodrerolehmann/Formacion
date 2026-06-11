@@ -8,7 +8,7 @@ metadata:
     storage: ultra-performance
 spec:
   nodeSelector:
-    disk: nvme    # No existe ningún nodo con esta label
+    gpu: "true"    # No existe ningún nodo con esta label
   containers:
     - name: nginx
       image: nginx:1.25-alpine

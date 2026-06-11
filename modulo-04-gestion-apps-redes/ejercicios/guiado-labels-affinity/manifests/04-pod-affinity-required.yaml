@@ -16,6 +16,7 @@ spec:
                 operator: In
                 values:
                   - ssd
+                  - nmve
   containers:
     - name: app
       image: hashicorp/http-echo:0.2.3

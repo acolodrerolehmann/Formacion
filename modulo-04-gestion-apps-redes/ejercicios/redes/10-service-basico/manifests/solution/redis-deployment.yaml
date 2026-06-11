@@ -11,6 +11,8 @@ spec:
     metadata:
       labels:
         app: redis
+        sistema: voting-app
+        centroiss: madrid
     spec:
       containers:
       - name: redis

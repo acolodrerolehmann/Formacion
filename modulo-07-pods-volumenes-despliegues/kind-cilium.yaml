@@ -5,6 +5,4 @@ nodes:
   - role: control-plane
   - role: worker
   - role: worker
-networking:
-  disableDefaultCNI: true      # Don't use kindnet — Cilium replaces it
-  kubeProxyMode: none          # Cilium replaces kube-proxy too
+        # Cilium replaces kube-proxy too
