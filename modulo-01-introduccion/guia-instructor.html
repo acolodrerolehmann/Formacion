@@ -6,437 +6,80 @@
     <title>Guía del Instructor — Introducción a Kubernetes</title>
     <style>
         :root {
-            --bg-primary: #0d1117;
-            --bg-secondary: #161b22;
-            --bg-tertiary: #21262d;
-            --border: #30363d;
-            --text-primary: #e6edf3;
-            --text-secondary: #8b949e;
-            --text-muted: #6e7681;
-            --accent-blue: #58a6ff;
-            --accent-green: #3fb950;
-            --accent-orange: #d29922;
-            --accent-red: #f85149;
-            --accent-purple: #bc8cff;
-            --code-bg: #1b2028;
-            --table-header: #1c2128;
-            --table-row-alt: #131920;
-            --blockquote-border: #58a6ff;
-            --shadow: 0 4px 12px rgba(0,0,0,0.4);
+            --bg-primary: #0d1117; --bg-secondary: #161b22; --bg-tertiary: #21262d;
+            --border: #30363d; --text-primary: #e6edf3; --text-secondary: #8b949e;
+            --text-muted: #6e7681; --accent-blue: #58a6ff; --accent-green: #3fb950;
+            --accent-orange: #d29922; --accent-red: #f85149; --accent-purple: #bc8cff;
+            --code-bg: #1b2028; --table-header: #1c2128; --table-row-alt: #131920;
+            --blockquote-border: #58a6ff; --shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            font-size: 16px;
-        }
-
-        /* Slide container */
-        .slide-deck {
-            width: 100%;
-            height: 100vh;
-            position: relative;
-        }
-
-        .slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            overflow-y: auto;
-            padding: 60px 80px 100px;
-        }
-
-        .slide.active {
-            display: block;
-        }
-
-        .slide-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        /* Title slide */
-        .slide-title {
-            display: none;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .slide-title.active {
-            display: flex;
-        }
-
-        .slide-title h1 {
-            font-size: 2.8em;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .slide-title .k8s-icon {
-            display: inline-block;
-            width: 56px;
-            height: 56px;
-            background: var(--accent-blue);
-            border-radius: 50%;
-            text-align: center;
-            line-height: 56px;
-            font-size: 30px;
-            margin-right: 14px;
-            vertical-align: middle;
-        }
-
-        .slide-title .meta-badges {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        /* Badges */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 500;
-            border: 1px solid var(--border);
-            background: var(--bg-secondary);
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; background-color: var(--bg-primary); color: var(--text-primary); line-height: 1.6; font-size: 16px; }
+        .slide-deck { width: 100%; height: 100vh; position: relative; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; overflow-y: auto; padding: 60px 80px 100px; }
+        .slide.active { display: block; }
+        .slide-inner { max-width: 1100px; margin: 0 auto; }
+        .slide-title { display: none; justify-content: center; align-items: center; text-align: center; flex-direction: column; gap: 20px; }
+        .slide-title.active { display: flex; }
+        .slide-title h1 { font-size: 2.8em; font-weight: 700; letter-spacing: -0.5px; }
+        .slide-title .k8s-icon { display: inline-block; width: 56px; height: 56px; background: var(--accent-blue); border-radius: 50%; text-align: center; line-height: 56px; font-size: 30px; margin-right: 14px; vertical-align: middle; }
+        .slide-title .meta-badges { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.85em; font-weight: 500; border: 1px solid var(--border); background: var(--bg-secondary); }
         .badge-blue { border-color: var(--accent-blue); color: var(--accent-blue); }
         .badge-green { border-color: var(--accent-green); color: var(--accent-green); }
         .badge-orange { border-color: var(--accent-orange); color: var(--accent-orange); }
-
-        /* TOC slide */
-        .toc {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 30px 40px;
-            max-width: 700px;
-            margin: 40px auto;
-        }
-
-        .toc h2 {
-            font-size: 1.1em;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 14px;
-            border-bottom: none;
-            display: block;
-        }
-
-        .toc ol {
-            padding-left: 0;
-            list-style: none;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .toc li a {
-            color: var(--accent-blue);
-            text-decoration: none;
-            font-size: 1em;
-            padding: 6px 0;
-            display: block;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .toc li a:hover {
-            color: var(--text-primary);
-        }
-
-        /* Content sections */
-        .section {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-
-        h2 {
-            font-size: 1.7em;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--accent-blue);
-            display: inline-block;
-        }
-
-        h3 {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: var(--accent-blue);
-            margin: 24px 0 12px;
-        }
-
-        h4 {
-            font-size: 1.05em;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin: 18px 0 10px;
-        }
-
-        p {
-            margin-bottom: 12px;
-            color: var(--text-primary);
-        }
-
-        /* Key message boxes */
-        .key-message {
-            background: linear-gradient(135deg, rgba(88, 166, 255, 0.08) 0%, rgba(88, 166, 255, 0.03) 100%);
-            border-left: 4px solid var(--accent-blue);
-            padding: 14px 18px;
-            border-radius: 0 8px 8px 0;
-            margin: 16px 0;
-            font-style: italic;
-            color: var(--text-primary);
-        }
-
-        /* Lists */
-        ul, ol {
-            margin: 10px 0 14px 24px;
-            color: var(--text-primary);
-        }
-
-        li {
-            margin-bottom: 5px;
-            padding-left: 4px;
-        }
-
-        li strong {
-            color: var(--accent-blue);
-        }
-
-        /* Tables */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 16px 0;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            font-size: 0.88em;
-        }
-
-        thead {
-            background: var(--table-header);
-        }
-
-        th {
-            padding: 10px 14px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-primary);
-            border-bottom: 2px solid var(--border);
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 8px 14px;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-secondary);
-        }
-
-        tr:nth-child(even) {
-            background: var(--table-row-alt);
-        }
-
-        td strong {
-            color: var(--text-primary);
-        }
-
-        /* Code */
-        code {
-            background: var(--code-bg);
-            color: var(--accent-green);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
-            font-size: 0.88em;
-            border: 1px solid var(--border);
-        }
-
-        pre code {
-            display: block;
-            padding: 14px 18px;
-            overflow-x: auto;
-            line-height: 1.5;
-        }
-
-        /* Images */
-        .diagram {
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .diagram img {
-            max-width: 100%;
-            max-height: 45vh;
-            height: auto;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-        }
-
-        .diagram figcaption {
-            color: var(--text-muted);
-            font-size: 0.85em;
-            margin-top: 8px;
-            font-style: italic;
-        }
-
-        /* Comparison table */
-        .comparison-table td:first-child {
-            font-weight: 600;
-            color: var(--text-primary);
-            white-space: nowrap;
-        }
-
-        /* Blockquote */
-        blockquote {
-            border-left: 3px solid var(--blockquote-border);
-            padding: 10px 16px;
-            margin: 14px 0;
-            color: var(--text-secondary);
-            font-style: italic;
-        }
-
-        /* Navigation controls */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            z-index: 1000;
-        }
-
-        .nav-bar button {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            padding: 8px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 500;
-            transition: background 0.2s, border-color 0.2s;
-        }
-
-        .nav-bar button:hover {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
-            color: #fff;
-        }
-
-        .nav-bar button:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            background: var(--bg-tertiary);
-            border-color: var(--border);
-            color: var(--text-muted);
-        }
-
-        .nav-progress {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-secondary);
-            font-size: 0.85em;
-        }
-
-        .progress-bar {
-            width: 200px;
-            height: 4px;
-            background: var(--bg-tertiary);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--accent-blue);
-            transition: width 0.3s ease;
-        }
-
-        .slide-counter {
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* Keyboard hint */
-        .nav-hint {
-            color: var(--text-muted);
-            font-size: 0.75em;
-        }
-
-        .nav-hint kbd {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 3px;
-            padding: 1px 5px;
-            font-size: 0.9em;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .slide { padding: 30px 20px 80px; }
-            .slide-title h1 { font-size: 1.8em; }
-            .toc ol { grid-template-columns: 1fr; }
-            table { font-size: 0.8em; }
-            th, td { padding: 6px 8px; }
-            .progress-bar { width: 100px; }
-        }
-
-        /* Print — show all slides */
-        @media print {
-            html, body { overflow: visible; height: auto; }
-            .slide { position: static; display: block !important; page-break-after: always; overflow: visible; }
-            .nav-bar { display: none; }
-        }
+        .toc { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 30px 40px; max-width: 700px; margin: 40px auto; }
+        .toc h2 { font-size: 1.1em; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; border-bottom: none; display: block; }
+        .toc ol { padding-left: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .toc li a { color: var(--accent-blue); text-decoration: none; font-size: 1em; padding: 6px 0; display: block; cursor: pointer; transition: color 0.2s; }
+        .toc li a:hover { color: var(--text-primary); }
+        .section { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        h2 { font-size: 1.7em; font-weight: 600; color: var(--text-primary); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent-blue); display: inline-block; }
+        h3 { font-size: 1.2em; font-weight: 600; color: var(--accent-blue); margin: 24px 0 12px; }
+        h4 { font-size: 1.05em; font-weight: 600; color: var(--text-primary); margin: 18px 0 10px; }
+        p { margin-bottom: 12px; color: var(--text-primary); }
+        .key-message { background: linear-gradient(135deg, rgba(88,166,255,0.08) 0%, rgba(88,166,255,0.03) 100%); border-left: 4px solid var(--accent-blue); padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 16px 0; font-style: italic; color: var(--text-primary); }
+        ul, ol { margin: 10px 0 14px 24px; color: var(--text-primary); }
+        li { margin-bottom: 5px; padding-left: 4px; }
+        li strong { color: var(--accent-blue); }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); font-size: 0.88em; }
+        thead { background: var(--table-header); }
+        th { padding: 10px 14px; text-align: left; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid var(--border); white-space: nowrap; }
+        td { padding: 8px 14px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+        tr:nth-child(even) { background: var(--table-row-alt); }
+        td strong { color: var(--text-primary); }
+        code { background: var(--code-bg); color: var(--accent-green); padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace; font-size: 0.88em; border: 1px solid var(--border); }
+        pre code { display: block; padding: 14px 18px; overflow-x: auto; line-height: 1.5; border: none; }
+        .diagram { margin: 20px 0; text-align: center; }
+        .diagram img { max-width: 100%; max-height: 45vh; height: auto; border-radius: 8px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .diagram figcaption { color: var(--text-muted); font-size: 0.85em; margin-top: 8px; font-style: italic; }
+        .comparison-table td:first-child { font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+        blockquote { border-left: 3px solid var(--blockquote-border); padding: 10px 16px; margin: 14px 0; color: var(--text-secondary); font-style: italic; }
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: var(--bg-secondary); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; z-index: 1000; }
+        .nav-bar button { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9em; font-weight: 500; transition: background 0.2s, border-color 0.2s; }
+        .nav-bar button:hover { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; }
+        .nav-bar button:disabled { opacity: 0.3; cursor: not-allowed; background: var(--bg-tertiary); border-color: var(--border); color: var(--text-muted); }
+        .nav-progress { display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 0.85em; }
+        .progress-bar { width: 200px; height: 4px; background: var(--bg-tertiary); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent-blue); transition: width 0.3s ease; }
+        .slide-counter { font-variant-numeric: tabular-nums; }
+        .nav-hint { color: var(--text-muted); font-size: 0.75em; }
+        .nav-hint kbd { background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-size: 0.9em; }
+        @media (max-width: 768px) { .slide { padding: 30px 20px 80px; } .slide-title h1 { font-size: 1.8em; } .toc ol { grid-template-columns: 1fr; } table { font-size: 0.8em; } th, td { padding: 6px 8px; } .progress-bar { width: 100px; } }
+        @media print { html, body { overflow: visible; height: auto; } .slide { position: static; display: block !important; page-break-after: always; overflow: visible; } .nav-bar { display: none; } }
     </style>
 </head>
 <body>
-
 <div class="slide-deck" id="deck">
 
     <!-- SLIDE 0: Title -->
     <div class="slide slide-title active" data-slide="0">
-        <h1><span class="k8s-icon">☸</span> Introducción a Kubernetes</h1>
+        <h1><span class="k8s-icon">&#9784;</span> Introducción a Kubernetes</h1>
         <div class="meta-badges">
-            <span class="badge badge-blue">👥 Audiencia: Docker & Swarm users</span>
-            <span class="badge badge-green">⏱ Duración: ~2 horas</span>
-            <span class="badge badge-orange">🎯 Teórico-expositivo</span>
+            <span class="badge badge-blue">&#128101; Audiencia: Docker &amp; Swarm users</span>
+            <span class="badge badge-green">&#9201; Duración: ~2 horas</span>
+            <span class="badge badge-orange">&#127919; Teórico-expositivo</span>
         </div>
     </div>
 
@@ -460,31 +103,23 @@
             </nav>
         </div>
     </div>
-
-    <!-- SLIDE 2+ : Content sections -->
+    <!-- SLIDE 2: Section 1 -->
     <div class="slide" data-slide="2"><div class="slide-inner"><div class="section" id="sec1">
         <h2>1. Introducción a Kubernetes</h2>
-
         <h3>El Problema: ¿Por qué necesitamos esto?</h3>
-
         <div class="key-message">
             Imaginad que tenéis 50 contenedores Docker repartidos en 10 servidores. Es viernes a las 18:00. Uno de los servidores se cae. ¿Quién mueve los contenedores? ¿Quién avisa al load balancer? ¿Quién se queda el viernes?
         </div>
-
         <p>Con Docker sabéis empaquetar apps. Con Swarm aprendisteis a distribuirlas. Pero en producción real aparecen problemas que Swarm resuelve "a medias":</p>
-
         <ul>
-            <li>🔥 Un nodo se cae → ¿quién redistribuye la carga <em>rápido</em>?</li>
-            <li>📈 Black Friday → ¿quién escala de 3 a 30 réplicas <em>automáticamente</em>?</li>
-            <li>🔄 Deploy de nueva versión → ¿cómo hacerlo con <em>cero downtime</em>?</li>
-            <li>🔒 Microservicio A no debería hablar con C → ¿quién controla eso?</li>
-            <li>💾 La base de datos necesita disco que <em>sobreviva</em> al contenedor → ¿cómo?</li>
+            <li>&#128293; Un nodo se cae → ¿quién redistribuye la carga <em>rápido</em>?</li>
+            <li>&#128200; Black Friday → ¿quién escala de 3 a 30 réplicas <em>automáticamente</em>?</li>
+            <li>&#128260; Deploy de nueva versión → ¿cómo hacerlo con <em>cero downtime</em>?</li>
+            <li>&#128274; Microservicio A no debería hablar con C → ¿quién controla eso?</li>
+            <li>&#128190; La base de datos necesita disco que <em>sobreviva</em> al contenedor → ¿cómo?</li>
         </ul>
-
         <p><strong>Kubernetes resuelve todos estos problemas.</strong> Y lo hace de forma declarativa: tú describes el estado deseado, K8s se encarga de mantenerlo.</p>
-
         <h3>Origen: De Google al Mundo</h3>
-
         <table>
             <thead><tr><th>Año</th><th>Evento</th></tr></thead>
             <tbody>
@@ -496,94 +131,44 @@
                 <tr><td><strong>Hoy</strong></td><td>96% de organizaciones usan o evalúan K8s (CNCF Survey 2023)</td></tr>
             </tbody>
         </table>
-
         <h3>¿Qué es Kubernetes en una frase?</h3>
-
         <div class="key-message">
             "Kubernetes es una plataforma portable y extensible de código abierto para administrar cargas de trabajo y servicios. Facilita la automatización y la configuración declarativa."
         </div>
-
         <ul>
-            <li>📦 <strong>Orientada a contenedores</strong> — todo es un contenedor</li>
-            <li>🧩 <strong>Microservicios</strong> — diseñada para apps distribuidas</li>
-            <li>☁️ <strong>Híbrida / Multi-cloud</strong> — funciona igual en cualquier sitio</li>
-            <li>🛠️ <strong>Escrito en Go</strong> — rápido, compilado, concurrente</li>
-            <li>🌍 <strong>Comunidad masiva</strong> — +3.500 contributors, mayor proyecto en GitHub después de Linux</li>
+            <li>&#128230; <strong>Orientada a contenedores</strong> — todo es un contenedor</li>
+            <li>&#129001; <strong>Microservicios</strong> — diseñada para apps distribuidas</li>
+            <li>&#9925; <strong>Híbrida / Multi-cloud</strong> — funciona igual en cualquier sitio</li>
+            <li>&#128295; <strong>Escrito en Go</strong> — rápido, compilado, concurrente</li>
+            <li>&#127757; <strong>Comunidad masiva</strong> — +3.500 contributors, mayor proyecto en GitHub después de Linux</li>
         </ul>
-
         <h3>El nombre</h3>
         <p><strong>K8s</strong> = K + 8 letras + s (abreviatura de la comunidad).</p>
-
         <figure class="diagram">
             <img src="assets/kubernetes-overview.png" alt="Kubernetes Overview">
             <figcaption>Ecosistema Kubernetes</figcaption>
         </figure>
     </div></div></div>
-
-    <!-- SECTION 2 -->
+    <!-- SLIDE 3: Section 2 -->
     <div class="slide" data-slide="3"><div class="slide-inner"><div class="section" id="sec2">
         <h2>2. Conceptos Fundamentales</h2>
-
         <h3>¿Qué es un Orquestador?</h3>
-
         <p>Ya sabéis lo que hace <code>docker run</code> en una máquina. Un orquestador hace lo mismo, pero a <strong>escala de clúster</strong>: decide dónde correr cada contenedor, los mantiene vivos, los escala, y gestiona su red y almacenamiento. Automáticamente.</p>
-
         <p>En Swarm esto ya lo hacíais, pero de forma limitada. K8s lleva cada capacidad al siguiente nivel:</p>
-
         <h3>Las 7 Capacidades de un Orquestador</h3>
-
         <table>
             <thead><tr><th>#</th><th>Capacidad</th><th>Ejemplo real</th><th>¿Swarm lo hace?</th></tr></thead>
             <tbody>
-                <tr>
-                    <td>1</td>
-                    <td><strong>Scheduling</strong><br><small>Decidir dónde ejecutar cada contenedor</small></td>
-                    <td>"Este pod necesita 2GB RAM → va al nodo que tenga espacio"</td>
-                    <td>✅ Básico</td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td><strong>Auto-healing</strong><br><small>Recuperarse de fallos automáticamente</small></td>
-                    <td>"El pod murió → reiniciar. El nodo cayó → mover pods a otro"</td>
-                    <td>✅ Básico</td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td><strong>Auto-scaling</strong><br><small>Escalar según demanda</small></td>
-                    <td>"CPU al 80% → crear 5 réplicas más. Baja al 20% → reducir a 2"</td>
-                    <td>❌ Manual</td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td><strong>Service Discovery</strong><br><small>Encontrar servicios por nombre</small></td>
-                    <td><code>curl http://api-users:8080</code> → resuelve automáticamente</td>
-                    <td>✅ DNS</td>
-                </tr>
-                <tr>
-                    <td>5</td>
-                    <td><strong>Load Balancing</strong><br><small>Distribuir tráfico entre réplicas</small></td>
-                    <td>"3 pods de nginx → repartir requests round-robin"</td>
-                    <td>✅ Routing mesh</td>
-                </tr>
-                <tr>
-                    <td>6</td>
-                    <td><strong>Rolling Updates</strong><br><small>Actualizar sin downtime</small></td>
-                    <td>"Reemplazar v1.2 → v1.3 de a un pod a la vez, sin cortar tráfico"</td>
-                    <td>✅ Básico</td>
-                </tr>
-                <tr>
-                    <td>7</td>
-                    <td><strong>Declarative Config</strong><br><small>Describes QUÉ quieres, no CÓMO</small></td>
-                    <td>"Quiero 3 réplicas de nginx:1.25 con 512MB RAM" → K8s lo hace</td>
-                    <td>⚠️ Parcial</td>
-                </tr>
+                <tr><td>1</td><td><strong>Scheduling</strong><br><small>Decidir dónde ejecutar cada contenedor</small></td><td>"Este pod necesita 2GB RAM → va al nodo que tenga espacio"</td><td>✅ Básico</td></tr>
+                <tr><td>2</td><td><strong>Auto-healing</strong><br><small>Recuperarse de fallos automáticamente</small></td><td>"El pod murió → reiniciar. El nodo cayó → mover pods a otro"</td><td>✅ Básico</td></tr>
+                <tr><td>3</td><td><strong>Auto-scaling</strong><br><small>Escalar según demanda</small></td><td>"CPU al 80% → crear 5 réplicas más. Baja al 20% → reducir a 2"</td><td>❌ Manual</td></tr>
+                <tr><td>4</td><td><strong>Service Discovery</strong><br><small>Encontrar servicios por nombre</small></td><td><code>curl http://api-users:8080</code> → resuelve automáticamente</td><td>✅ DNS</td></tr>
+                <tr><td>5</td><td><strong>Load Balancing</strong><br><small>Distribuir tráfico entre réplicas</small></td><td>"3 pods de nginx → repartir requests round-robin"</td><td>✅ Routing mesh</td></tr>
+                <tr><td>6</td><td><strong>Rolling Updates</strong><br><small>Actualizar sin downtime</small></td><td>"Reemplazar v1.2 → v1.3 de a un pod a la vez, sin cortar tráfico"</td><td>✅ Básico</td></tr>
+                <tr><td>7</td><td><strong>Declarative Config</strong><br><small>Describes QUÉ quieres, no CÓMO</small></td><td>"Quiero 3 réplicas de nginx:1.25 con 512MB RAM" → K8s lo hace</td><td>⚠️ Parcial</td></tr>
             </tbody>
         </table>
-
         <h3>Declarativo vs Imperativo</h3>
-
-        <p>La diferencia más importante respecto a trabajar con Docker directamente:</p>
-
         <table>
             <thead><tr><th>Imperativo (Docker/Swarm)</th><th>Declarativo (Kubernetes)</th></tr></thead>
             <tbody>
@@ -593,11 +178,9 @@
                 <tr><td>El estado es "lo que pasó"</td><td>El estado es "lo que debería ser"</td></tr>
             </tbody>
         </table>
-
         <div class="key-message">
             Kubernetes funciona con un <strong>reconciliation loop</strong>: compara constantemente el estado actual con el estado deseado. Si hay diferencia, actúa. Siempre. 24/7. Sin intervención humana.
         </div>
-
         <h3>¿Cómo se traduce esto de Swarm a K8s?</h3>
         <table>
             <thead><tr><th>Docker Swarm</th><th>Kubernetes</th></tr></thead>
@@ -611,19 +194,15 @@
             </tbody>
         </table>
     </div></div></div>
-
-    <!-- SECTION 3 -->
+    <!-- SLIDE 4: Section 3 -->
     <div class="slide" data-slide="4"><div class="slide-inner"><div class="section" id="sec3">
         <h2>3. Arquitectura del Clúster</h2>
-
         <figure class="diagram">
             <img src="assets/arquitectura-cluster.png" alt="Arquitectura del Clúster K8s">
             <figcaption>Arquitectura: Control Plane + Worker Nodes</figcaption>
         </figure>
-
         <h3>Control Plane (Master Node)</h3>
         <p>Equivalente al Swarm Manager, pero con componentes especializados:</p>
-
         <table>
             <thead><tr><th>Componente</th><th>Función</th><th>Equivalente Swarm</th></tr></thead>
             <tbody>
@@ -634,12 +213,10 @@
                 <tr><td><strong>cloud-controller-manager</strong></td><td>Integración con proveedores cloud</td><td>N/A</td></tr>
             </tbody>
         </table>
-
         <figure class="diagram">
             <img src="assets/etcd-leader-follower.png" alt="etcd Leader/Follower">
             <figcaption>etcd: consenso Leader/Follower (Raft)</figcaption>
         </figure>
-
         <h3>Worker Nodes</h3>
         <table>
             <thead><tr><th>Componente</th><th>Función</th><th>Equivalente Swarm</th></tr></thead>
@@ -650,7 +227,6 @@
             </tbody>
         </table>
     </div></div></div>
-
     <!-- SECTION 4 -->
     <div class="slide" data-slide="5"><div class="slide-inner"><div class="section" id="sec4">
         <h2>4. Objetos Principales</h2>
@@ -683,6 +259,356 @@
             <li>En K8s: 1 pod = 1+ contenedores que comparten red y almacenamiento</li>
             <li>Caso típico: <strong>sidecar patterns</strong> (proxy, logging, etc.)</li>
         </ul>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- NUEVO: Labels, Anotaciones, Node Affinity y Tolerations    -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+
+        <h3>Labels</h3>
+
+        <p>Los <strong>labels</strong> son pares clave/valor que se adjuntan a cualquier objeto de Kubernetes (pods, nodos, services, deployments…). Son la base del sistema de selección de K8s: los controladores y services usan <strong>selectors</strong> para encontrar los objetos que les corresponden.</p>
+
+        <div class="key-message">
+            Sin labels no hay selección. Un Service sin selector no sabe a qué pods enviar tráfico. Un Deployment sin selector no sabe qué pods gestiona.
+        </div>
+
+        <h4>Reglas de nomenclatura</h4>
+        <ul>
+            <li>Formato: <code>clave: valor</code> — ambos son strings</li>
+            <li>Clave: opcional prefijo DNS (<code>app.kubernetes.io/</code>) + nombre ≤ 63 chars alfanumérico con <code>-</code>, <code>_</code>, <code>.</code></li>
+            <li>Valor: ≤ 63 chars, puede estar vacío</li>
+            <li>Pueden añadirse, modificarse y eliminarse en cualquier momento</li>
+        </ul>
+
+        <h4>Labels recomendados por la comunidad (<code>app.kubernetes.io/*</code>)</h4>
+        <table>
+            <thead><tr><th>Label</th><th>Significado</th><th>Ejemplo</th></tr></thead>
+            <tbody>
+                <tr><td><code>app.kubernetes.io/name</code></td><td>Nombre de la aplicación</td><td><code>mysql</code></td></tr>
+                <tr><td><code>app.kubernetes.io/version</code></td><td>Versión del artefacto</td><td><code>8.0.35</code></td></tr>
+                <tr><td><code>app.kubernetes.io/component</code></td><td>Componente dentro de la app</td><td><code>database</code></td></tr>
+                <tr><td><code>app.kubernetes.io/part-of</code></td><td>Aplicación de nivel superior</td><td><code>ecommerce</code></td></tr>
+                <tr><td><code>app.kubernetes.io/managed-by</code></td><td>Herramienta que lo gestiona</td><td><code>helm</code></td></tr>
+                <tr><td><code>environment</code></td><td>Entorno (convención propia)</td><td><code>production</code></td></tr>
+            </tbody>
+        </table>
+
+        <h4>Ejemplo: Pod con labels</h4>
+        <pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: api-users-v2
+  labels:
+    app.kubernetes.io/name: api-users
+    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: ecommerce
+    environment: production
+    tier: api
+spec:
+  containers:
+  - name: api
+    image: myrepo/api-users:2.1.0
+</code></pre>
+
+        <h4>Selectors: usando labels para encontrar objetos</h4>
+        <p>Existen dos tipos de selector:</p>
+        <ul>
+            <li><strong>Equality-based</strong>: <code>=</code>, <code>==</code>, <code>!=</code> — usado por Services y ReplicationControllers</li>
+            <li><strong>Set-based</strong>: <code>in</code>, <code>notin</code>, <code>exists</code> — usado por Deployments, Jobs, y Node Affinity</li>
+        </ul>
+
+        <pre><code># Listar pods con un label concreto
+kubectl get pods -l environment=production
+
+# Múltiples condiciones (AND implícito)
+kubectl get pods -l "environment=production,tier=api"
+
+# Set-based: pods cuyo tier sea api o frontend
+kubectl get pods -l "tier in (api, frontend)"
+
+# Pods que NO tengan el label environment=development
+kubectl get pods -l "environment notin (development)"
+
+# Añadir un label a un pod existente
+kubectl label pod api-users-v2 release=stable
+
+# Eliminar un label (con guión al final de la clave)
+kubectl label pod api-users-v2 release-
+</code></pre>
+
+        <h4>Labels en un Service (selector)</h4>
+        <pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: svc-api-users
+spec:
+  selector:
+    app.kubernetes.io/name: api-users   # Solo envía tráfico a pods con este label
+    environment: production
+  ports:
+  - port: 80
+    targetPort: 8080
+</code></pre>
+
+        <h3>Anotaciones (Annotations)</h3>
+
+        <p>Las anotaciones también son pares clave/valor, pero a diferencia de los labels <strong>no se usan para selección</strong>. Son metadatos arbitrarios para uso humano o de herramientas externas. No tienen restricciones de tamaño y pueden contener texto largo, JSON, URLs, etc.</p>
+
+        <table>
+            <thead><tr><th>Labels</th><th>Annotations</th></tr></thead>
+            <tbody>
+                <tr><td>Identifican y agrupan objetos</td><td>Almacenan metadatos descriptivos</td></tr>
+                <tr><td>Usados por selectores y controladores</td><td>Usados por herramientas externas (Helm, Ingress, monitorización…)</td></tr>
+                <tr><td>Valor ≤ 63 chars</td><td>Sin límite práctico de tamaño</td></tr>
+                <tr><td>Sintaxis estricta (alfanumérico)</td><td>Cualquier string válido</td></tr>
+            </tbody>
+        </table>
+
+        <h4>Casos de uso reales</h4>
+        <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-users
+  annotations:
+    # Metadatos del equipo
+    team: "backend-squad"
+    contact: "backend@miempresa.com"
+    # Información del repositorio/CI
+    git-commit: "a3f9c12"
+    ci-pipeline: "https://jenkins.miempresa.com/job/api-users/42"
+    # Configuración para herramientas externas
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+    # Configuración de Ingress nginx
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Helm (añadido automáticamente)
+    meta.helm.sh/release-name: "ecommerce"
+    meta.helm.sh/release-namespace: "production"
+</code></pre>
+
+        <p>Gestión desde CLI:</p>
+        <pre><code># Añadir anotación
+kubectl annotate pod api-users-v2 contact="backend@miempresa.com"
+
+# Ver anotaciones de un objeto
+kubectl describe pod api-users-v2 | grep -A5 Annotations
+
+# Eliminar anotación
+kubectl annotate pod api-users-v2 contact-
+</code></pre>
+
+        <h3>Labels en Nodos</h3>
+
+        <p>Los nodos también tienen labels. Kubernetes añade algunos automáticamente al unirse al clúster, y los administradores pueden añadir los suyos propios para describir características del hardware o la ubicación.</p>
+
+        <h4>Labels automáticos en nodos</h4>
+        <pre><code>kubernetes.io/hostname: worker-01
+kubernetes.io/os: linux
+kubernetes.io/arch: amd64
+node.kubernetes.io/instance-type: m5.xlarge   # en cloud
+topology.kubernetes.io/region: eu-west-1
+topology.kubernetes.io/zone: eu-west-1a
+</code></pre>
+
+        <h4>Añadir labels personalizados a nodos</h4>
+        <pre><code># Marcar un nodo como nodo con GPU
+kubectl label node worker-03 accelerator=nvidia-tesla-v100
+
+# Marcar nodos por entorno
+kubectl label node worker-01 environment=production
+kubectl label node worker-02 environment=production
+kubectl label node worker-04 environment=staging
+
+# Ver labels de todos los nodos
+kubectl get nodes --show-labels
+
+# Filtrar nodos por label
+kubectl get nodes -l accelerator=nvidia-tesla-v100
+</code></pre>
+
+        <h3>Node Selector (asignación básica a nodos)</h3>
+
+        <p>La forma más simple de controlar en qué nodo se ejecuta un pod es <code>nodeSelector</code>: el scheduler solo colocará el pod en nodos que tengan <strong>todos</strong> los labels indicados.</p>
+
+        <pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-job
+spec:
+  nodeSelector:
+    accelerator: nvidia-tesla-v100   # Solo en nodos con GPU
+    environment: production
+  containers:
+  - name: ml-trainer
+    image: myrepo/ml-trainer:latest
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+</code></pre>
+
+        <div class="key-message">
+            <code>nodeSelector</code> es simple y efectivo para casos básicos. Para lógica más compleja (preferencias, condiciones OR, rangos) se usa <strong>Node Affinity</strong>.
+        </div>
+
+        <h3>Node Affinity (afinidad con nodos)</h3>
+
+        <p>Node Affinity es la evolución de <code>nodeSelector</code>. Permite expresar reglas más expresivas usando operadores (<code>In</code>, <code>NotIn</code>, <code>Exists</code>, <code>DoesNotExist</code>, <code>Gt</code>, <code>Lt</code>) y tiene dos modos:</p>
+
+        <table>
+            <thead><tr><th>Tipo</th><th>Comportamiento</th></tr></thead>
+            <tbody>
+                <tr><td><code>requiredDuringSchedulingIgnoredDuringExecution</code></td><td>El pod <strong>solo</strong> se programa si cumple la regla. Si no hay nodo válido, el pod queda pendiente (Pending).</td></tr>
+                <tr><td><code>preferredDuringSchedulingIgnoredDuringExecution</code></td><td>El scheduler <strong>intenta</strong> cumplir la regla, pero si no hay nodo válido, programa el pod igualmente donde pueda.</td></tr>
+            </tbody>
+        </table>
+
+        <p><em>"IgnoredDuringExecution"</em> significa: si un pod ya está corriendo y se cambia el label del nodo, el pod <strong>no</strong> es expulsado.</p>
+
+        <h4>Ejemplo: required + preferred</h4>
+        <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-users
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api-users
+  template:
+    metadata:
+      labels:
+        app: api-users
+    spec:
+      affinity:
+        nodeAffinity:
+          # OBLIGATORIO: solo en nodos de producción en Europa
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: environment
+                operator: In
+                values: [production]
+              - key: topology.kubernetes.io/region
+                operator: In
+                values: [eu-west-1, eu-central-1]
+          # PREFERIDO: intentar ir a nodos de alta memoria
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 80        # mayor peso = mayor preferencia (1-100)
+            preference:
+              matchExpressions:
+              - key: node-type
+                operator: In
+                values: [high-memory]
+          - weight: 20
+            preference:
+              matchExpressions:
+              - key: topology.kubernetes.io/zone
+                operator: In
+                values: [eu-west-1a]   # preferir zona A (más barata)
+      containers:
+      - name: api
+        image: myrepo/api-users:2.1.0
+</code></pre>
+
+        <h3>Taints y Tolerations</h3>
+
+        <p>Node Affinity atrae pods a nodos. Los <strong>Taints</strong> hacen lo contrario: <strong>repelen</strong> pods de un nodo. Un pod solo puede ejecutarse en un nodo con taint si tiene una <strong>Toleration</strong> correspondiente.</p>
+
+        <div class="key-message">
+            Analogía: un taint es un "cartel de no pasar" en un nodo. Una toleration es el "pase especial" que lleva el pod para ignorar ese cartel.
+        </div>
+
+        <h4>Estructura de un Taint</h4>
+        <pre><code>clave=valor:efecto
+
+# Efectos posibles:
+# NoSchedule      — no programar nuevos pods sin toleration
+# PreferNoSchedule — intentar no programar (soft)
+# NoExecute       — no programar Y expulsar pods existentes sin toleration
+</code></pre>
+
+        <h4>Gestión de Taints en nodos</h4>
+        <pre><code># Añadir taint: nodo reservado para GPU
+kubectl taint node worker-03 dedicated=gpu:NoSchedule
+
+# Añadir taint: nodo en mantenimiento (expulsa pods existentes)
+kubectl taint node worker-01 maintenance=true:NoExecute
+
+# Ver taints de un nodo
+kubectl describe node worker-03 | grep Taint
+
+# Eliminar taint (guión al final)
+kubectl taint node worker-03 dedicated=gpu:NoSchedule-
+</code></pre>
+
+        <h4>Tolerations en pods/deployments</h4>
+        <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpu-trainer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gpu-trainer
+  template:
+    metadata:
+      labels:
+        app: gpu-trainer
+    spec:
+      tolerations:
+      # Permite ejecutarse en nodos con taint dedicated=gpu:NoSchedule
+      - key: dedicated
+        operator: Equal
+        value: gpu
+        effect: NoSchedule
+      # Tolerar nodos en mantenimiento hasta 30 segundos antes de ser expulsado
+      - key: maintenance
+        operator: Exists
+        effect: NoExecute
+        tolerationSeconds: 30
+      # Combinar con nodeAffinity para IR además al nodo GPU
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: accelerator
+                operator: In
+                values: [nvidia-tesla-v100]
+      containers:
+      - name: trainer
+        image: myrepo/gpu-trainer:latest
+</code></pre>
+
+        <h4>Taints automáticos del sistema</h4>
+        <p>K8s añade taints automáticamente en ciertas situaciones. Es importante conocerlos para entender por qué un pod puede quedar en Pending:</p>
+        <table>
+            <thead><tr><th>Taint automático</th><th>Cuándo se añade</th></tr></thead>
+            <tbody>
+                <tr><td><code>node.kubernetes.io/not-ready:NoExecute</code></td><td>Nodo no está Ready</td></tr>
+                <tr><td><code>node.kubernetes.io/unreachable:NoExecute</code></td><td>Nodo no es alcanzable por el Control Plane</td></tr>
+                <tr><td><code>node.kubernetes.io/memory-pressure:NoSchedule</code></td><td>Nodo con poca memoria</td></tr>
+                <tr><td><code>node.kubernetes.io/disk-pressure:NoSchedule</code></td><td>Nodo con poco disco</td></tr>
+                <tr><td><code>node-role.kubernetes.io/control-plane:NoSchedule</code></td><td>Nodos del Control Plane (no ejecutan pods de usuario)</td></tr>
+            </tbody>
+        </table>
+
+        <h4>Resumen: cuándo usar cada mecanismo</h4>
+        <table>
+            <thead><tr><th>Mecanismo</th><th>Dirección</th><th>Cuándo usarlo</th></tr></thead>
+            <tbody>
+                <tr><td><strong>nodeSelector</strong></td><td>Pod → Nodo (atracción)</td><td>Casos simples, una sola condición de igualdad</td></tr>
+                <tr><td><strong>Node Affinity</strong></td><td>Pod → Nodo (atracción)</td><td>Condiciones complejas, OR, preferencias con pesos</td></tr>
+                <tr><td><strong>Taints</strong></td><td>Nodo → Pod (repulsión)</td><td>Reservar nodos para usos especiales (GPU, infra, prod)</td></tr>
+                <tr><td><strong>Tolerations</strong></td><td>Pod tolera Taint</td><td>Permitir que ciertos pods entren en nodos reservados</td></tr>
+            </tbody>
+        </table>
+
+        <!-- FIN NUEVO CONTENIDO -->
 
         <h3>Secrets y ConfigMaps (configuración y secretos)</h3>
         <p>Los <strong>ConfigMap</strong> almacenan datos no sensibles (pares clave/valor o archivos). Los <strong>Secret</strong> son para datos sensibles (base64-encoded).</p>
@@ -738,19 +664,14 @@ metadata:
     <!-- SECTION 5 -->
     <div class="slide" data-slide="6"><div class="slide-inner"><div class="section" id="sec5">
         <h2>5. Despliegues</h2>
-
         <p>En Swarm tenéis <code>docker service create</code> para desplegar contenedores con réplicas. En Kubernetes existen varios controladores (ReplicaSet, Deployment, StatefulSet, DaemonSet, Job/CronJob) diseñados para distintos patrones de ejecución. Primero definimos el elemento básico: el <strong>ReplicaSet</strong>.</p>
-
         <h3>ReplicaSet (unidad básica de replicación)</h3>
-
         <p>Un <em>ReplicaSet</em> asegura que haya un número deseado de réplicas de un Pod corriendo en todo momento. Sus puntos clave:</p>
         <ul>
             <li>Mantiene <code>spec.replicas</code> pods que coinciden con su <code>selector</code> (labels).</li>
             <li>Si un pod muere, el ReplicaSet crea otro usando la plantilla de pod en <code>spec.template</code>.</li>
             <li>Si es creado por un Deployment, el ReplicaSet tendrá una <code>ownerReference</code> apuntando al Deployment que lo controla.</li>
         </ul>
-
-        <p>Ejemplo mínimo de ReplicaSet:</p>
         <pre><code>apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
@@ -767,46 +688,29 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx:1.21-alpine
-</code></pre>
-
-        <p>Comandos útiles:</p>
+        image: nginx:1.21-alpine</code></pre>
         <pre><code>kubectl get rs
 kubectl describe rs nginx-rs
-kubectl get pods -l app=nginx-rs -o wide
-</code></pre>
-
+kubectl get pods -l app=nginx-rs -o wide</code></pre>
         <p><strong>Nota:</strong> normalmente se trabaja con <em>Deployments</em> en lugar de gestionar ReplicaSets manualmente. <strong>StatefulSet</strong> no usa ReplicaSets; tiene su propio controlador y reglas específicas.</p>
-
         <h3>Deployments (controlador para aplicaciones sin estado)</h3>
-
         <p>Un <em>Deployment</em> es la abstracción más usada para aplicaciones stateless. Internamente crea y gestiona ReplicaSets para soportar actualizaciones seguras, historial y rollbacks.</p>
-
-        <p>Puntos clave:</p>
         <ul>
             <li><strong>Actualizaciones</strong>: con <code>strategy: RollingUpdate</code> Kubernetes crea un nuevo ReplicaSet con la nueva plantilla y va escalándolo mientras reduce el anterior (<code>maxSurge</code> / <code>maxUnavailable</code>).</li>
             <li><strong>Historial</strong>: mantiene revisiones para permitir <code>kubectl rollout undo</code>.</li>
             <li><strong>Escalado</strong>: cambiar <code>spec.replicas</code> o usar HPA para autoescalado.</li>
             <li><strong>Ownership</strong>: el Deployment es el dueño de los ReplicaSets que crea.</li>
         </ul>
-
-        <p>Ejemplo de estrategia RollingUpdate:</p>
         <pre><code>strategy:
   type: RollingUpdate
   rollingUpdate:
     maxSurge: 1
-    maxUnavailable: 1
-</code></pre>
-
-        <p>Comandos útiles:</p>
+    maxUnavailable: 1</code></pre>
         <pre><code>kubectl apply -f my-deployment.yaml
 kubectl rollout status deployment/my-deployment
 kubectl rollout history deployment/my-deployment
-kubectl rollout undo deployment/my-deployment
-</code></pre>
-
+kubectl rollout undo deployment/my-deployment</code></pre>
         <h3>StatefulSets (aplicaciones con estado)</h3>
-
         <p>StatefulSet está diseñado para aplicaciones que necesitan identidad y almacenamiento persistente por pod:</p>
         <ul>
             <li>Nombres estables: <code>&lt;name&gt;-&lt;ordinal&gt;</code> (ej. <code>db-0</code>).</li>
@@ -814,20 +718,13 @@ kubectl rollout undo deployment/my-deployment
             <li><code>volumeClaimTemplates</code> para crear un PVC por pod, que persiste aunque el pod sea recreado.</li>
             <li>Operaciones ordenadas (creación, scalado, actualización) por defecto <code>OrderedReady</code> — existe opción <code>Parallel</code> para paralelizar.</li>
         </ul>
-
         <p>No usa ReplicaSets: su controlador gestiona directamente los pods y los volúmenes asociados.</p>
-
         <h3>DaemonSets (agentes por nodo)</h3>
-
         <p>DaemonSet garantiza que se ejecute un pod en cada nodo (o en el subconjunto de nodos definidos por selectores). Uso típico: agentes de logging, exporters de monitorización, componentes CNI.</p>
-
         <h3>Jobs y CronJobs (trabajos por lotes)</h3>
-
         <p><strong>Job</strong>: ejecuta uno o varios pods hasta completar la tarea con éxito. <strong>CronJob</strong>: programa Jobs periódicos (cron-style).</p>
         <p>Parámetros importantes: <code>completions</code>, <code>parallelism</code>, <code>backoffLimit</code>.</p>
-
         <h3>Resumen rápido</h3>
-
         <table>
             <thead><tr><th>Controlador</th><th>¿Cuándo usarlo?</th><th>Nota</th></tr></thead>
             <tbody>
@@ -839,60 +736,29 @@ kubectl rollout undo deployment/my-deployment
             </tbody>
         </table>
     </div></div></div>
-
     <!-- SECTION 6 -->
     <div class="slide" data-slide="7"><div class="slide-inner"><div class="section" id="sec6">
         <h2>6. Redes en Kubernetes</h2>
-
         <h3>De monolítico a microservicios</h3>
-
-        <figure class="diagram">
-            <img src="assets/red-monolitica.png" alt="Red Monolítica">
-            <figcaption>App monolítica: no te preocupas por networking</figcaption>
-        </figure>
-
-        <figure class="diagram">
-            <img src="assets/red-dinamica-contenedores.png" alt="Red Dinámica">
-            <figcaption>Con contenedores: Dynamic Network / Service Discovery</figcaption>
-        </figure>
-
+        <figure class="diagram"><img src="assets/red-monolitica.png" alt="Red Monolítica"><figcaption>App monolítica: no te preocupas por networking</figcaption></figure>
+        <figure class="diagram"><img src="assets/red-dinamica-contenedores.png" alt="Red Dinámica"><figcaption>Con contenedores: Dynamic Network / Service Discovery</figcaption></figure>
         <h3>Modelo de Red en K8s</h3>
-
-        <figure class="diagram">
-            <img src="assets/red-plana-pods.png" alt="Red Plana">
-            <figcaption>Flat network: todos los pods se comunican sin NAT</figcaption>
-        </figure>
-
+        <figure class="diagram"><img src="assets/red-plana-pods.png" alt="Red Plana"><figcaption>Flat network: todos los pods se comunican sin NAT</figcaption></figure>
         <ol>
             <li><strong>Flat network</strong> — todos los pods se ven entre sí sin NAT</li>
             <li>Cada pod tiene su propia IP</li>
             <li>La red es software (CNI plugins): Calico, Flannel, Cilium, etc.</li>
         </ol>
-
         <h3>Servicios y Service Discovery</h3>
-
-        <figure class="diagram">
-            <img src="assets/servicios-dns.png" alt="Servicios y DNS">
-            <figcaption>Service Discovery vía DNS interno</figcaption>
-        </figure>
-
+        <figure class="diagram"><img src="assets/servicios-dns.png" alt="Servicios y DNS"><figcaption>Service Discovery vía DNS interno</figcaption></figure>
         <ul>
             <li>Pods son efímeros → no usar IPs directamente</li>
             <li><strong>Services</strong> proporcionan IP estable + nombre DNS</li>
             <li>Resolución DNS: <code>mi-servicio.mi-namespace.svc.cluster.local</code></li>
         </ul>
-
-        <div class="key-message">
-            Esto ya lo conocéis de Swarm (VIP + DNS interno). K8s lo hace igual pero con más opciones.
-        </div>
-
+        <div class="key-message">Esto ya lo conocéis de Swarm (VIP + DNS interno). K8s lo hace igual pero con más opciones.</div>
         <h3>Tipos de Service</h3>
-
-        <figure class="diagram">
-            <img src="assets/clusterip-nodeport.png" alt="ClusterIP y NodePort">
-            <figcaption>ClusterIP (interno) vs NodePort (externo)</figcaption>
-        </figure>
-
+        <figure class="diagram"><img src="assets/clusterip-nodeport.png" alt="ClusterIP y NodePort"><figcaption>ClusterIP (interno) vs NodePort (externo)</figcaption></figure>
         <table>
             <thead><tr><th>Tipo</th><th>Acceso</th><th>Equivalente Swarm</th></tr></thead>
             <tbody>
@@ -901,45 +767,25 @@ kubectl rollout undo deployment/my-deployment
                 <tr><td><strong>LoadBalancer</strong></td><td>IP externa (cloud)</td><td>N/A</td></tr>
             </tbody>
         </table>
-
         <h3>Service Network</h3>
-
-        <figure class="diagram">
-            <img src="assets/service-network.png" alt="Service Network">
-            <figcaption>kube-proxy gestiona reglas iptables/IPVS en cada nodo</figcaption>
-        </figure>
-
+        <figure class="diagram"><img src="assets/service-network.png" alt="Service Network"><figcaption>kube-proxy gestiona reglas iptables/IPVS en cada nodo</figcaption></figure>
         <ul>
             <li>Los Services no tienen interfaz de red física</li>
             <li>kube-proxy gestiona reglas iptables/IPVS en cada nodo</li>
             <li>El tráfico se rutea al pod correcto</li>
         </ul>
-
         <h3>Ingress: Exponiendo servicios al exterior</h3>
-
-        <figure class="diagram">
-            <img src="assets/ingres.png" alt="Kubernetes Ingress">
-            <figcaption>Ingress enruta tráfico HTTP/HTTPS a múltiples servicios desde un único punto de entrada</figcaption>
-        </figure>
-
+        <figure class="diagram"><img src="assets/ingres.png" alt="Kubernetes Ingress"><figcaption>Ingress enruta tráfico HTTP/HTTPS a múltiples servicios desde un único punto de entrada</figcaption></figure>
         <p><strong>El problema:</strong> <code>NodePort</code> expone un puerto por servicio (limitado a 30000-32767). <code>LoadBalancer</code> crea un balanceador externo por cada servicio (caro en cloud). ¿Y si tengo 20 microservicios que quiero exponer por HTTP/HTTPS con dominios y paths distintos?</p>
-
         <p><strong>La solución: Ingress</strong> — un objeto que define reglas de enrutamiento HTTP/HTTPS a nivel de capa 7 (aplicación).</p>
-
         <table>
-            <thead>
-                <tr><th>Concepto</th><th>Descripción</th></tr>
-            </thead>
+            <thead><tr><th>Concepto</th><th>Descripción</th></tr></thead>
             <tbody>
                 <tr><td><strong>Ingress</strong></td><td>Recurso declarativo que define reglas de enrutamiento (host, path → Service)</td></tr>
                 <tr><td><strong>Ingress Controller</strong></td><td>Componente que implementa esas reglas (nginx, HAProxy, Traefik, Envoy…)</td></tr>
             </tbody>
         </table>
-
-        <blockquote>
-            <strong>Analogía Swarm:</strong> En Swarm usabais Traefik o nginx-proxy como reverse proxy manual. En K8s, Ingress <strong>estandariza</strong> ese patrón como objeto nativo del API.
-        </blockquote>
-
+        <blockquote><strong>Analogía Swarm:</strong> En Swarm usabais Traefik o nginx-proxy como reverse proxy manual. En K8s, Ingress <strong>estandariza</strong> ese patrón como objeto nativo del API.</blockquote>
         <h4>¿Cómo funciona?</h4>
         <ol>
             <li>Despliegas un <strong>Ingress Controller</strong> (es un pod que corre un reverse proxy)</li>
@@ -947,7 +793,6 @@ kubectl rollout undo deployment/my-deployment
             <li>El controller lee esas reglas y configura su proxy automáticamente</li>
             <li>El tráfico externo llega al controller → se enruta al Service correcto → llega a los pods</li>
         </ol>
-
         <h4>Ejemplo de recurso Ingress</h4>
         <pre><code>apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -968,107 +813,20 @@ spec:
             name: svc-usuarios
             port:
               number: 8080
-      - path: /pedidos
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-pedidos
-            port:
-              number: 8080
-  - host: admin.miempresa.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: svc-admin
-            port:
-              number: 3000
   tls:
   - hosts:
     - api.miempresa.com
-    - admin.miempresa.com
     secretName: mi-tls-secret</code></pre>
-
-        <blockquote>
-            Con un solo punto de entrada, enrutamos tráfico a 3 servicios distintos basándonos en el host y el path. Además, TLS se gestiona de forma centralizada.
-        </blockquote>
-
         <h4>Ingress según el entorno</h4>
         <table>
-            <thead>
-                <tr><th>Entorno</th><th>Ingress Controller típico</th><th>¿Cómo llega el tráfico?</th><th>Notas</th></tr>
-            </thead>
+            <thead><tr><th>Entorno</th><th>Ingress Controller típico</th><th>¿Cómo llega el tráfico?</th><th>Notas</th></tr></thead>
             <tbody>
-                <tr>
-                    <td><strong>Kind</strong></td>
-                    <td>ingress-nginx (deploy manual)</td>
-                    <td>El controller se expone con <code>hostPort</code> o <code>extraPortMappings</code> en la config de Kind</td>
-                    <td>Requiere configuración especial en el manifiesto de creación del clúster Kind (<code>extraPortMappings</code> para mapear puertos 80/443 del host al nodo)</td>
-                </tr>
-                <tr>
-                    <td><strong>Vanilla K8s (kubeadm, bare-metal)</strong></td>
-                    <td>ingress-nginx, Traefik, HAProxy</td>
-                    <td>El controller se despliega como <code>DaemonSet</code> o <code>Deployment</code> con <code>hostNetwork: true</code> o un Service <code>NodePort</code>/<code>LoadBalancer</code> (MetalLB)</td>
-                    <td>Sin cloud, necesitas MetalLB o similar para simular un LoadBalancer. Alternativa: <code>NodePort</code> + DNS apuntando a los nodos</td>
-                </tr>
-                <tr>
-                    <td><strong>OpenShift</strong></td>
-                    <td><strong>Router (HAProxy)</strong> — preinstalado</td>
-                    <td>OpenShift usa <strong>Routes</strong> en lugar de Ingress (concepto anterior que inspiró Ingress). Soporta Ingress también, pero lo traduce a Routes internamente</td>
-                    <td>Las Routes soportan TLS edge/passthrough/reencrypt, sticky sessions, y blue-green/canary nativo. El Router escucha en puertos 80/443 de nodos infra</td>
-                </tr>
-                <tr>
-                    <td><strong>Cloud (EKS/GKE/AKS)</strong></td>
-                    <td>AWS ALB Controller, GCE Ingress, Azure AGIC</td>
-                    <td>Se provisiona automáticamente un Load Balancer del cloud provider al crear el Ingress</td>
-                    <td>Cada Ingress puede crear un ALB/NLB (AWS), HTTP(S) LB (GCP), o Application Gateway (Azure). Integración nativa con certificados del cloud</td>
-                </tr>
+                <tr><td><strong>Kind</strong></td><td>ingress-nginx (deploy manual)</td><td>El controller se expone con <code>hostPort</code> o <code>extraPortMappings</code></td><td>Requiere config especial en manifiesto Kind</td></tr>
+                <tr><td><strong>Vanilla K8s</strong></td><td>ingress-nginx, Traefik, HAProxy</td><td>DaemonSet con <code>hostNetwork: true</code> o Service NodePort/LoadBalancer (MetalLB)</td><td>Sin cloud, necesitas MetalLB o similar</td></tr>
+                <tr><td><strong>OpenShift</strong></td><td><strong>Router (HAProxy)</strong> — preinstalado</td><td>Usa <strong>Routes</strong> en lugar de Ingress; soporta Ingress también</td><td>Routes soportan TLS edge/passthrough/reencrypt</td></tr>
+                <tr><td><strong>Cloud (EKS/GKE/AKS)</strong></td><td>AWS ALB Controller, GCE Ingress, Azure AGIC</td><td>Se provisiona automáticamente un Load Balancer del cloud provider</td><td>Integración nativa con certificados del cloud</td></tr>
             </tbody>
         </table>
-
-        <h4>Kind: configuración especial</h4>
-        <pre><code># Manifiesto de creación del clúster Kind
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-nodes:
-- role: control-plane
-  kubeadmConfigPatches:
-  - |
-    kind: InitConfiguration
-    nodeRegistration:
-      kubeletExtraArgs:
-        node-labels: "ingress-ready=true"
-  extraPortMappings:
-  - containerPort: 80
-    hostPort: 80
-    protocol: TCP
-  - containerPort: 443
-    hostPort: 443
-    protocol: TCP</code></pre>
-
-        <p>Después se instala el controller:</p>
-        <pre><code>kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml</code></pre>
-
-        <h4>OpenShift: Routes vs Ingress</h4>
-        <pre><code># Route nativa de OpenShift (equivalente a Ingress)
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  name: mi-app-route
-spec:
-  host: app.apps.mi-cluster.example.com
-  to:
-    kind: Service
-    name: mi-servicio
-    weight: 100
-  port:
-    targetPort: 8080
-  tls:
-    termination: edge
-    insecureEdgeTerminationPolicy: Redirect</code></pre>
-
         <h4>Resumen Ingress</h4>
         <ul>
             <li><strong>Sin Ingress:</strong> 1 LoadBalancer por servicio → caro y difícil de gestionar</li>
@@ -1081,12 +839,7 @@ spec:
     <!-- SECTION 7 -->
     <div class="slide" data-slide="8"><div class="slide-inner"><div class="section" id="sec7">
         <h2>7. Almacenamiento</h2>
-
-        <figure class="diagram">
-            <img src="assets/almacenamiento-pv-pvc.png" alt="PV y PVC">
-            <figcaption>Modelo de almacenamiento: PV → PVC → Pod</figcaption>
-        </figure>
-
+        <figure class="diagram"><img src="assets/almacenamiento-pv-pvc.png" alt="PV y PVC"><figcaption>Modelo de almacenamiento: PV → PVC → Pod</figcaption></figure>
         <table>
             <thead><tr><th>Concepto</th><th>Descripción</th><th>Equivalente Swarm</th></tr></thead>
             <tbody>
@@ -1095,23 +848,18 @@ spec:
                 <tr><td><strong>PersistentVolumeClaim (PVC)</strong></td><td>"Ticket" para solicitar un PV</td><td>N/A</td></tr>
             </tbody>
         </table>
-
-        <div class="key-message">
-            Diferencia clave: En Swarm montas volúmenes directamente. En K8s hay una capa de abstracción (PV/PVC) que permite provisioning dinámico y portabilidad.
-        </div>
+        <div class="key-message">Diferencia clave: En Swarm montas volúmenes directamente. En K8s hay una capa de abstracción (PV/PVC) que permite provisioning dinámico y portabilidad.</div>
     </div></div></div>
 
     <!-- SECTION 8 -->
     <div class="slide" data-slide="9"><div class="slide-inner"><div class="section" id="sec8">
         <h2>8. Namespaces</h2>
-
         <ul>
             <li>Cluster virtual que agrupa objetos</li>
             <li>Nombre único dentro del clúster</li>
             <li>Resource Quotas por namespace</li>
             <li><strong>Swarm no tiene equivalente</strong> → concepto nuevo para los alumnos</li>
         </ul>
-
         <h3>Casos de uso</h3>
         <ul>
             <li>Separar entornos (dev/staging/prod) en un solo clúster</li>
@@ -1120,14 +868,10 @@ spec:
         </ul>
     </div></div></div>
 
-    <!-- SECTION 9: MIGRACIÓN -->
+    <!-- SECTION 9 -->
     <div class="slide" data-slide="10"><div class="slide-inner"><div class="section" id="sec9">
         <h2>9. Migración de Docker Swarm a Kubernetes</h2>
-
-        <blockquote>
-            "Ya sabéis que K8s es más potente que Swarm. Ahora la pregunta es: ¿cómo migráis lo que ya tenéis en Swarm sin romper producción?"
-        </blockquote>
-
+        <blockquote>"Ya sabéis que K8s es más potente que Swarm. Ahora la pregunta es: ¿cómo migráis lo que ya tenéis en Swarm sin romper producción?"</blockquote>
         <h3>Estrategia de Migración Incremental</h3>
         <table>
             <thead><tr><th>#</th><th>Paso</th><th>Descripción</th></tr></thead>
@@ -1141,7 +885,6 @@ spec:
                 <tr><td>7</td><td><strong>Decommission</strong></td><td>Apagar Swarm cuando todo funcione</td></tr>
             </tbody>
         </table>
-
         <h3>Mapeo Detallado de Conceptos</h3>
         <table>
             <thead><tr><th>Docker Swarm</th><th>Kubernetes</th><th>Notas</th></tr></thead>
@@ -1159,7 +902,6 @@ spec:
                 <tr><td><code>docker service scale</code></td><td><code>kubectl scale</code> o HPA</td><td>K8s puede escalar automáticamente</td></tr>
             </tbody>
         </table>
-
         <h3>Herramienta: Kompose</h3>
         <p>Convierte <code>docker-compose.yml</code> a manifiestos K8s automáticamente:</p>
         <pre><code># Instalación
@@ -1169,7 +911,6 @@ brew install kompose   # macOS
 kompose convert -f docker-compose.yml
 
 # Genera: deployment.yaml + service.yaml por cada servicio del compose</code></pre>
-
         <h4>Limitaciones de Kompose</h4>
         <ul>
             <li>No genera Ingress (hay que añadirlo manualmente)</li>
@@ -1178,7 +919,6 @@ kompose convert -f docker-compose.yml
             <li>No gestiona secrets de forma segura (los pone como env vars)</li>
             <li>Es un punto de partida, NO el resultado final</li>
         </ul>
-
         <h3>Buenas Prácticas de Migración</h3>
         <table>
             <thead><tr><th>Práctica</th><th>Por qué</th></tr></thead>
@@ -1196,7 +936,6 @@ kompose convert -f docker-compose.yml
     <!-- SECTION 10 -->
     <div class="slide" data-slide="11"><div class="slide-inner"><div class="section" id="sec10">
         <h2>10. Resumen y Comparativa</h2>
-
         <h3>Docker Swarm vs Kubernetes</h3>
         <table>
             <thead><tr><th>Aspecto</th><th>Docker Swarm</th><th>Kubernetes</th></tr></thead>
@@ -1212,74 +951,25 @@ kompose convert -f docker-compose.yml
                 <tr><td><strong>Auto-scaling</strong></td><td>Manual</td><td>HPA/VPA/Cluster Autoscaler</td></tr>
             </tbody>
         </table>
-
         <h3>Comparativa Completa: Docker Swarm vs Kubernetes vs OpenShift</h3>
         <table class="comparison-table">
             <thead><tr><th>Aspecto</th><th>Docker Swarm</th><th>Kubernetes</th><th>OpenShift</th></tr></thead>
             <tbody>
-                <tr>
-                    <td><strong>Curva de aprendizaje</strong></td>
-                    <td>Baja. Si sabes Docker, sabes Swarm</td>
-                    <td>Media-Alta. Muchos conceptos nuevos</td>
-                    <td>Alta. K8s + capas adicionales</td>
-                </tr>
-                <tr>
-                    <td><strong>Instalación</strong></td>
-                    <td>Trivial (<code>docker swarm init</code>)</td>
-                    <td>Compleja. Múltiples componentes</td>
-                    <td>Muy compleja. Infraestructura específica</td>
-                </tr>
-                <tr>
-                    <td><strong>Actualizaciones</strong></td>
-                    <td>Manuales, simples</td>
-                    <td>Rolling updates + Helm</td>
-                    <td>OTA via Cluster Version Operator</td>
-                </tr>
-                <tr>
-                    <td><strong>Seguridad</strong></td>
-                    <td>Básica. mTLS entre nodos</td>
-                    <td>RBAC, Network Policies, PSS</td>
-                    <td>Por defecto. SCCs, SELinux, OAuth</td>
-                </tr>
-                <tr>
-                    <td><strong>Redes</strong></td>
-                    <td>Overlay (VXLAN) + routing mesh</td>
-                    <td>CNI plugins (Calico, Flannel, Cilium)</td>
-                    <td>OVN-Kubernetes, preconfigurado</td>
-                </tr>
-                <tr>
-                    <td><strong>Almacenamiento</strong></td>
-                    <td>Docker volumes</td>
-                    <td>PV/PVC/StorageClass (CSI)</td>
-                    <td>K8s + Red Hat ODF</td>
-                </tr>
-                <tr>
-                    <td><strong>Ecosistema</strong></td>
-                    <td>Limitado, en declive</td>
-                    <td>Enorme (CNCF)</td>
-                    <td>Enterprise + Operator Hub</td>
-                </tr>
-                <tr>
-                    <td><strong>Escalado</strong></td>
-                    <td>Manual. Sin auto-scaling</td>
-                    <td>HPA, VPA, Cluster Autoscaler</td>
-                    <td>K8s + Machine API</td>
-                </tr>
-                <tr>
-                    <td><strong>Ideal para</strong></td>
-                    <td>Entornos pequeños, dev local</td>
-                    <td>Multi-cloud, DevOps, flexibilidad</td>
-                    <td>Empresas, soporte, seguridad estricta</td>
-                </tr>
+                <tr><td><strong>Curva de aprendizaje</strong></td><td>Baja. Si sabes Docker, sabes Swarm</td><td>Media-Alta. Muchos conceptos nuevos</td><td>Alta. K8s + capas adicionales</td></tr>
+                <tr><td><strong>Instalación</strong></td><td>Trivial (<code>docker swarm init</code>)</td><td>Compleja. Múltiples componentes</td><td>Muy compleja. Infraestructura específica</td></tr>
+                <tr><td><strong>Actualizaciones</strong></td><td>Manuales, simples</td><td>Rolling updates + Helm</td><td>OTA via Cluster Version Operator</td></tr>
+                <tr><td><strong>Seguridad</strong></td><td>Básica. mTLS entre nodos</td><td>RBAC, Network Policies, PSS</td><td>Por defecto. SCCs, SELinux, OAuth</td></tr>
+                <tr><td><strong>Redes</strong></td><td>Overlay (VXLAN) + routing mesh</td><td>CNI plugins (Calico, Flannel, Cilium)</td><td>OVN-Kubernetes, preconfigurado</td></tr>
+                <tr><td><strong>Almacenamiento</strong></td><td>Docker volumes</td><td>PV/PVC/StorageClass (CSI)</td><td>K8s + Red Hat ODF</td></tr>
+                <tr><td><strong>Ecosistema</strong></td><td>Limitado, en declive</td><td>Enorme (CNCF)</td><td>Enterprise + Operator Hub</td></tr>
+                <tr><td><strong>Escalado</strong></td><td>Manual. Sin auto-scaling</td><td>HPA, VPA, Cluster Autoscaler</td><td>K8s + Machine API</td></tr>
+                <tr><td><strong>Ideal para</strong></td><td>Entornos pequeños, dev local</td><td>Multi-cloud, DevOps, flexibilidad</td><td>Empresas, soporte, seguridad estricta</td></tr>
             </tbody>
         </table>
-
-        <div class="key-message">
-            "Kubernetes es más complejo que Swarm, pero ya tenéis los conceptos base. OpenShift añade una capa enterprise sobre K8s. En los siguientes módulos vamos a hacer hands-on."
-        </div>
+        <div class="key-message">"Kubernetes es más complejo que Swarm, pero ya tenéis los conceptos base. OpenShift añade una capa enterprise sobre K8s. En los siguientes módulos vamos a hacer hands-on."</div>
     </div></div></div>
 
-</div> <!-- /slide-deck -->
+</div>
 
 <!-- Navigation bar -->
 <div class="nav-bar">
@@ -1325,6 +1015,5 @@ kompose convert -f docker-compose.yml
 
     updateNav();
 </script>
-
 </body>
 </html>
