@@ -1,0 +1,26 @@
+spec:
+  replicas: 3
+
+  template:
+    spec:
+      containers:
+      - name: redis
+        image: redis:7
+        args:
+        - redis-server
+        - --appendonly
+        - yes
+
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi

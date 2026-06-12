@@ -99,6 +99,7 @@
                     <li><a onclick="goToSlide(9)">8. Namespaces</a></li>
                     <li><a onclick="goToSlide(10)">9. Migración de Docker Swarm a Kubernetes</a></li>
                     <li><a onclick="goToSlide(11)">10. Resumen y Comparativa</a></li>
+                    <li><a onclick="goToSlide(12)">11. Empaquetado de Aplicaciones</a></li>
                 </ol>
             </nav>
         </div>
@@ -969,6 +970,316 @@ kompose convert -f docker-compose.yml
         <div class="key-message">"Kubernetes es más complejo que Swarm, pero ya tenéis los conceptos base. OpenShift añade una capa enterprise sobre K8s. En los siguientes módulos vamos a hacer hands-on."</div>
     </div></div></div>
 
+    <!-- SECTION 11 -->
+    <div class="slide" data-slide="12"><div class="slide-inner"><div class="section" id="sec11">
+        <h2>11. Empaquetado de Aplicaciones</h2>
+        <p>Desplegar un microservicio con un YAML es sencillo. Desplegar 20 microservicios con distintas configuraciones para dev, staging y prod ya no lo es. Aquí entran las herramientas de empaquetado.</p>
+        <div class="key-message">Sin herramientas específicas, los proyectos K8s acaban con YAML duplicado por entorno, cambios inconsistentes y scripts <code>sed</code> para parametrizar valores. Las dos herramientas principales para resolverlo son <strong>Kustomize</strong> y <strong>Helm</strong>.</div>
+
+        <h3>Kustomize</h3>
+        <p>Kustomize permite personalizar manifiestos Kubernetes mediante <strong>overlays y patches</strong>, sin plantillas ni lenguajes adicionales. Trabaja con YAML puro: parte de una configuración base y aplica capas de cambios por entorno. Está integrado en <code>kubectl</code> desde la versión 1.14, no requiere instalación aparte.</p>
+        <div class="key-message">Filosofía: en lugar de insertar variables en YAML, Kustomize <strong>sobreescribe y fusiona</strong> campos concretos. El resultado es siempre YAML válido y legible.</div>
+
+        <h4>Instalación</h4>
+        <pre><code># Ya integrado en kubectl (desde k8s 1.14)
+kubectl kustomize --help
+
+# macOS con Homebrew
+brew install kustomize
+
+# Linux — script oficial
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+sudo mv kustomize /usr/local/bin/
+
+kustomize version</code></pre>
+
+        <h4>Estructura de directorios</h4>
+        <p>Kustomize separa los manifiestos en una capa <strong>base</strong> (común a todos los entornos) y <strong>overlays</strong> (uno por entorno):</p>
+        <pre><code>mi-app/
+├── base/
+│   ├── kustomization.yaml
+│   ├── deployment.yaml
+│   └── service.yaml
+└── overlays/
+    ├── dev/
+    │   ├── kustomization.yaml
+    │   └── patch-replicas.yaml
+    ├── staging/
+    │   └── kustomization.yaml
+    └── production/
+        ├── kustomization.yaml
+        └── patch-production.yaml</code></pre>
+
+        <h4>Ejemplo: base</h4>
+        <pre><code># base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - service.yaml
+images:
+  - name: myrepo/api-users
+    newTag: "2.1.0"</code></pre>
+
+        <h4>Overlay de producción</h4>
+        <pre><code># overlays/production/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+namespace: production
+commonLabels:
+  environment: production
+images:
+  - name: myrepo/api-users
+    newTag: "2.1.0-stable"
+patches:
+  - path: patch-production.yaml</code></pre>
+
+        <pre><code># overlays/production/patch-production.yaml
+# Strategic Merge Patch: solo se indican los campos a modificar
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-users
+spec:
+  replicas: 5
+  template:
+    spec:
+      containers:
+      - name: api
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"</code></pre>
+
+        <h4>Uso en CLI</h4>
+        <pre><code># Ver el YAML final generado sin aplicar
+kubectl kustomize overlays/production
+
+# Aplicar al clúster
+kubectl apply -k overlays/production
+
+# Ver diff antes de aplicar
+kubectl diff -k overlays/production</code></pre>
+
+        <h4>¿Cuándo usar Kustomize?</h4>
+        <ul>
+            <li>Apps propias donde los manifiestos ya existen y se quieren personalizar por entorno</li>
+            <li>Equipos que prefieren YAML puro sin aprender un lenguaje de plantillas</li>
+            <li>Entornos GitOps (ArgoCD, Flux) donde los manifiestos son la fuente de verdad</li>
+            <li>Personalizar manifiestos de terceros sin forkearlos</li>
+        </ul>
+
+        <h3>Helm</h3>
+        <p>Helm es el <strong>gestor de paquetes</strong> de Kubernetes. Un paquete Helm se llama <strong>chart</strong> y contiene plantillas YAML parametrizadas, valores por defecto y metadatos. Helm renderiza las plantillas con los valores proporcionados y aplica el resultado al clúster, manteniendo un historial de <strong>releases</strong>.</p>
+
+        <table>
+            <thead><tr><th>Ecosistema</th><th>Equivalente Helm</th></tr></thead>
+            <tbody>
+                <tr><td><code>apt</code> / <code>brew</code></td><td><code>helm install</code></td></tr>
+                <tr><td>Paquete .deb / .pkg</td><td>Chart</td></tr>
+                <tr><td>Repositorio de paquetes</td><td>Repositorio de charts</td></tr>
+                <tr><td>Versión instalada</td><td>Release</td></tr>
+            </tbody>
+        </table>
+
+        <h4>Instalación</h4>
+        <pre><code># macOS
+brew install helm
+
+# Linux — script oficial
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# Windows (Chocolatey)
+choco install kubernetes-helm
+
+helm version</code></pre>
+
+        <h4>Repositorios y búsqueda de charts</h4>
+        <p>Los charts se distribuyen en repositorios HTTP. El índice oficial de la comunidad es <strong>Artifact Hub</strong> (<code>artifacthub.io</code>).</p>
+        <pre><code># Añadir repositorios populares
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+
+# Actualizar índice local
+helm repo update
+
+# Buscar un chart
+helm search repo postgresql
+helm search hub wordpress          # busca en Artifact Hub</code></pre>
+
+        <h4>Ciclo de vida de una release</h4>
+        <pre><code># Instalar
+helm install mi-postgres bitnami/postgresql \
+  --namespace bbdd --create-namespace \
+  --set auth.postgresPassword=s3cr3t \
+  --set primary.persistence.size=10Gi
+
+# Ver releases instaladas
+helm list -A
+
+# Actualizar
+helm upgrade mi-postgres bitnami/postgresql \
+  --namespace bbdd \
+  --set primary.persistence.size=20Gi
+
+# Ver historial de revisiones
+helm history mi-postgres -n bbdd
+
+# Rollback a la revisión anterior
+helm rollback mi-postgres 1 -n bbdd
+
+# Desinstalar
+helm uninstall mi-postgres -n bbdd</code></pre>
+
+        <h4>Values: personalizar un chart</h4>
+        <p>En lugar de pasar <code>--set</code> en línea, se usa un fichero <code>values.yaml</code> propio:</p>
+        <pre><code># Ver todos los valores configurables de un chart
+helm show values bitnami/postgresql > postgresql-defaults.yaml</code></pre>
+        <pre><code># mi-postgresql-values.yaml — solo los valores que cambiamos
+auth:
+  postgresPassword: "s3cr3t"
+  username: "appuser"
+  database: "ecommerce"
+primary:
+  persistence:
+    enabled: true
+    size: 20Gi
+    storageClass: "fast-ssd"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+metrics:
+  enabled: true   # activa exportador Prometheus</code></pre>
+        <pre><code>helm install mi-postgres bitnami/postgresql \
+  -f mi-postgresql-values.yaml \
+  -n bbdd --create-namespace</code></pre>
+
+        <h4>Crear un chart propio</h4>
+        <pre><code>helm create mi-app
+
+# Estructura generada:
+mi-app/
+├── Chart.yaml           # nombre, versión, descripción
+├── values.yaml          # valores por defecto
+├── charts/              # dependencias (subcharts)
+└── templates/
+    ├── deployment.yaml  # plantillas con sintaxis Go template
+    ├── service.yaml
+    ├── ingress.yaml
+    ├── _helpers.tpl     # funciones reutilizables
+    └── NOTES.txt        # mensaje post-instalación</code></pre>
+
+        <pre><code># Fragmento de templates/deployment.yaml
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        {{- if .Values.resources }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}</code></pre>
+
+        <pre><code>helm lint mi-app/                            # validar
+helm template mi-app mi-app/ -f values.yaml  # renderizar sin aplicar
+helm install mi-app mi-app/ --dry-run --debug # dry-run contra el clúster</code></pre>
+
+        <h4>Kustomize vs Helm</h4>
+        <table>
+            <thead><tr><th>Criterio</th><th>Kustomize</th><th>Helm</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Curva de aprendizaje</strong></td><td>Baja — YAML puro</td><td>Media — Go templates</td></tr>
+                <tr><td><strong>Personalización de terceros</strong></td><td>Excelente (overlay sobre cualquier YAML)</td><td>Solo si el chart lo expone como valor</td></tr>
+                <tr><td><strong>Distribución de software</strong></td><td>No diseñado para ello</td><td>Ideal — charts en repositorios</td></tr>
+                <tr><td><strong>Gestión de releases</strong></td><td>Depende de GitOps</td><td>Integrada (historial, rollback, upgrade)</td></tr>
+                <tr><td><strong>Lógica condicional compleja</strong></td><td>No</td><td>Sí (if, range, funciones Sprig)</td></tr>
+            </tbody>
+        </table>
+        <div class="key-message">Patrón habitual en producción: <strong>Helm para instalar software de terceros</strong> (PostgreSQL, Prometheus, ingress-nginx) + <strong>Kustomize para personalizar las aplicaciones propias</strong> por entorno. No son excluyentes.</div>
+
+        <h3>Introducción a los Operadores</h3>
+        <p>Helm y Kustomize automatizan el <em>despliegue</em>. Pero, ¿quién gestiona lo que pasa después? Una base de datos necesita backups, failover, réplicas de lectura, upgrades sin pérdida de datos… operaciones que requieren <strong>conocimiento del dominio</strong>. Un operador codifica ese conocimiento.</p>
+        <div class="key-message">Un operador es un controlador personalizado que extiende la API de Kubernetes para gestionar aplicaciones complejas de forma automatizada, imitando lo que haría un operador humano experto.</div>
+
+        <h4>¿Qué es un Operador?</h4>
+        <p>Un operador se compone de dos piezas:</p>
+        <ul>
+            <li><strong>Custom Resource Definition (CRD):</strong> extiende la API de K8s con nuevos tipos de objetos. En lugar de gestionar Pods y Services para una base de datos, defines un objeto <code>PostgreSQLCluster</code>.</li>
+            <li><strong>Controlador personalizado:</strong> un pod que observa esos recursos y actúa para mantener el estado deseado, igual que los controladores nativos de K8s.</li>
+        </ul>
+        <pre><code># Con el operador CloudNativePG instalado, esto crea y gestiona
+# un clúster PostgreSQL completo con HA y backups automáticos
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-prod
+spec:
+  instances: 3          # primario + 2 réplicas de lectura
+  postgresql:
+    version: "16"
+  storage:
+    size: 100Gi
+    storageClass: fast-ssd
+  backup:
+    retentionPolicy: "30d"
+    barmanObjectStore:
+      destinationPath: "s3://mi-bucket/backups"</code></pre>
+        <p>Al aplicar este manifiesto, el operador crea los pods, inicializa la replicación, configura el failover automático y programa backups en S3. Sin intervención manual.</p>
+
+        <h4>Operadores populares</h4>
+        <table>
+            <thead><tr><th>Operador</th><th>Gestiona</th><th>Recurso personalizado</th></tr></thead>
+            <tbody>
+                <tr><td><strong>CloudNativePG</strong></td><td>PostgreSQL HA</td><td><code>Cluster</code>, <code>Backup</code></td></tr>
+                <tr><td><strong>Strimzi</strong></td><td>Apache Kafka</td><td><code>Kafka</code>, <code>KafkaTopic</code></td></tr>
+                <tr><td><strong>Prometheus Operator</strong></td><td>Stack de monitorización</td><td><code>Prometheus</code>, <code>ServiceMonitor</code></td></tr>
+                <tr><td><strong>cert-manager</strong></td><td>Certificados TLS</td><td><code>Certificate</code>, <code>ClusterIssuer</code></td></tr>
+                <tr><td><strong>Argo CD</strong></td><td>GitOps / despliegues</td><td><code>Application</code>, <code>AppProject</code></td></tr>
+                <tr><td><strong>Velero</strong></td><td>Backups del clúster</td><td><code>Backup</code>, <code>Restore</code></td></tr>
+            </tbody>
+        </table>
+
+        <h4>¿Dónde encontrar operadores?</h4>
+        <ul>
+            <li><strong>OperatorHub.io</strong> — catálogo oficial de la comunidad CNCF</li>
+            <li><strong>Artifact Hub</strong> — junto a los charts de Helm</li>
+            <li>En <strong>OpenShift</strong>: el <em>Operator Lifecycle Manager (OLM)</em> está integrado y gestiona instalación, actualización y dependencias desde la consola web</li>
+        </ul>
+
+        <h4>Los 5 niveles de madurez de un operador</h4>
+        <table>
+            <thead><tr><th>Nivel</th><th>Capacidad</th></tr></thead>
+            <tbody>
+                <tr><td><strong>1 — Basic Install</strong></td><td>Instalación y configuración automática</td></tr>
+                <tr><td><strong>2 — Seamless Upgrades</strong></td><td>Actualizaciones de versión sin downtime</td></tr>
+                <tr><td><strong>3 — Full Lifecycle</strong></td><td>Backups, recuperación ante fallos</td></tr>
+                <tr><td><strong>4 — Deep Insights</strong></td><td>Métricas, alertas, análisis de logs integrados</td></tr>
+                <tr><td><strong>5 — Auto Pilot</strong></td><td>Auto-tuning, auto-scaling, remediación automática</td></tr>
+            </tbody>
+        </table>
+
+        <h4>Resumen: las tres herramientas</h4>
+        <table>
+            <thead><tr><th>Herramienta</th><th>Qué resuelve</th><th>Cuándo usarla</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Kustomize</strong></td><td>Personalización de manifiestos por entorno</td><td>Apps propias, GitOps, overlays</td></tr>
+                <tr><td><strong>Helm</strong></td><td>Empaquetado, distribución y ciclo de vida</td><td>Software de terceros, distribución de apps</td></tr>
+                <tr><td><strong>Operadores</strong></td><td>Automatización de operaciones con estado</td><td>BBDD, colas de mensajes, apps stateful complejas</td></tr>
+            </tbody>
+        </table>
+    </div></div></div>
+
 </div>
 
 <!-- Navigation bar -->
@@ -977,7 +1288,7 @@ kompose convert -f docker-compose.yml
     <div class="nav-progress">
         <span class="nav-hint"><kbd>←</kbd> <kbd>→</kbd> para navegar</span>
         <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-        <span class="slide-counter" id="counter">1 / 12</span>
+        <span class="slide-counter" id="counter">1 / 13</span>
     </div>
     <button id="btn-next" onclick="nextSlide()">Siguiente →</button>
 </div>
