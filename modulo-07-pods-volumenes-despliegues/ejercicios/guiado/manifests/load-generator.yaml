@@ -15,3 +15,4 @@ spec:
         - /bin/sh
         - -c
         - while true; do wget -q -O- http://web-hpa > /dev/null; done
+        if kafka

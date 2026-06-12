@@ -1,5 +1,3 @@
-# Requiere instalar el Ingress Controller de NGINX en Kind:
-# kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -14,13 +12,13 @@ spec:
     - host: voyager.local
       http:
         paths:
-          - path: /
+          - path: /voyager
             pathType: Prefix
             backend:
               service:
-                name: frontend-svc
+                name: frontend-svcß
                 port:
-                  number: 80
+                  number: 8080
           - path: /api
             pathType: Prefix
             backend:

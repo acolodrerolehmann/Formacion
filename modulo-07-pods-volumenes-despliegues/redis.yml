@@ -1,7 +1,17 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
 spec:
+  serviceName: redis
   replicas: 3
-
+  selector:
+    matchLabels:
+      app: redis
   template:
+    metadata:
+      labels:
+        app: redis
     spec:
       containers:
       - name: redis
@@ -9,8 +19,10 @@ spec:
         args:
         - redis-server
         - --appendonly
-        - yes
-
+        - "yes"
+        ports:
+        - containerPort: 6379
+          name: redis
         volumeMounts:
         - name: redis-data
           mountPath: /data

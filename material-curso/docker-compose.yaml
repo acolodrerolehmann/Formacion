@@ -21,7 +21,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: backend
-    image: material-curso-backend:latest
+    image: backend:1.0.0
     environment:
       DB_HOST: database
       DB_PORT: "5432"
@@ -39,7 +39,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: frontend
-    image: material-curso-frontend:latest
+    image: frontend:1.0.0
     ports:
       - "8080:80"
     depends_on:

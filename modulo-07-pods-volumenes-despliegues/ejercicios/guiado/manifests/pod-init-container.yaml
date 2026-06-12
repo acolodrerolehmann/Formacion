@@ -9,7 +9,7 @@ spec:
   initContainers:
   - name: descargar-config
     image: busybox:1.36
-    command: ["sh", "-c", "echo '<h1>Configurado por init container</h1>' > /work-dir/index.html"]
+    command: ["curl", "-c", "redis http://redis:6379/config"]
     volumeMounts:
     - name: workdir
       mountPath: /work-dir
